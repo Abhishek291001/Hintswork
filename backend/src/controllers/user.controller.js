@@ -39,7 +39,15 @@ const { fullName, email, password, role, department, phoneNumber, companyId, ass
 });
 
 
-    const token = jwt.sign({ userId: newUser._id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign(
+      {
+        userId: newUser._id,
+        role: newUser.role,
+        company: newUser.company || null,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
     res.status(201).json({
       message: `${role} created successfully`,
@@ -96,7 +104,7 @@ export const addUserByAdmin = async (req, res) => {
       password: hashedPassword,
       role,
       department: department || null,
-      companyId: req.userCompanyId, // inherited from admin
+      company: req.userCompanyId, // inherited from admin
       assignedBrand: assignedBrand || null,
       assignedPlan: assignedPlan || "free",
       createdBy: req.userId,
@@ -112,8 +120,6 @@ export const addUserByAdmin = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-
 // GET /api/users/me
 export const getMe = async (req, res) => {
   try {
@@ -127,7 +133,6 @@ export const getMe = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 // Patch /api/users/me
  
 export const updateMe = async (req, res) => {
