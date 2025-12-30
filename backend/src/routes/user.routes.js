@@ -4,11 +4,26 @@
 
 
 import express from "express";
-import { createAdmin } from "../controllers/user.controller.js";
+import { 
+  getMe,
+  updateMe,
+  deleteMe,
+  signup,
+  addUserByAdmin
+} from "../controllers/user.controller.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-// POST /api/users/admin — create first admin
-router.post("/admin", createAdmin);
+
+// Public signup (first admin or self-registration)
+router.post("/signup", signup);
+
+// Admin adds manager/employee
+router.post("/users", authMiddleware, addUserByAdmin);
+// Logged-in user routes
+router.get("/me", authMiddleware, getMe);
+router.patch("/me", authMiddleware, updateMe);
+router.delete("/me", authMiddleware, deleteMe);
 
 export default router;

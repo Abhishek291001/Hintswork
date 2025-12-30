@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import {User} from '../models/User.model.js';
 
 export const authMiddleware = async (req, res, next) => {
     try {
@@ -15,14 +14,10 @@ export const authMiddleware = async (req, res, next) => {
       
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        
-        const user = await User.findById(decoded.id).select('-password');
-        if (!user) {
-            return res.status(401).json({ message: 'User not found, authorization denied' });
-        }
-
-        req.user = user; 
-        next(); 
+         // ✅ Store only the user ID not the complete user object
+          req.userId = decoded.userId;
+          req.userRole = decoded.role;
+          next(); 
     } catch (error) {
         return res.status(401).json({ message: 'Token is not valid', error: error.message });
     }

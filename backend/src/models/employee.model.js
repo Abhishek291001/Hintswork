@@ -29,19 +29,7 @@ const employeeSchema = new mongoose.Schema(
       index: true,
     },
 
-    assignedBrand: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Brand",
-      required: true,
-      index: true,
-    },
-
-    assignedPlan: {
-      type: String,
-      enum: ["free", "starter", "pro"],
-      default: "free",
-      index: true,
-    },
+    
 
     status: {
       type: String,
@@ -60,13 +48,6 @@ const employeeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/**
- * Text search index (FAST for millions of records)
- */
-employeeSchema.index({
-  fullName: "text",
-  email: "text",
-  department: "text",
-});
+
 
 export const Employee = mongoose.model("Employee", employeeSchema);

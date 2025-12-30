@@ -1,131 +1,148 @@
-// import { User } from "../models/User.model.js";
-
-/**
- * Create Admin or Manager
- * Access: Admin only
- */
-// export const createAdminOrManager = async (req, res) => {
-//   try {
-//     const { fullName, email, department, role, avatar } = req.body;
-
-//     // Only admin can create admin or manager
-//     if (req.user.role !== "admin") {
-//       return res.status(403).json({ message: "Access denied" });
-//     }
-
-//     // Validate role
-//     if (!["admin", "manager"].includes(role)) {
-//       return res.status(400).json({ message: "Invalid role" });
-//     }
-
-//     // Check if user already exists
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) {
-//       return res.status(409).json({ message: "User already exists" });
-//     }
-
-//     const user = await User.create({
-//       fullName,
-//       email,
-//       department,
-//       role,
-//       avatar: avatar || {},
-//       createdBy: req.user._id,
-//     });
-
-//     res.status(201).json({
-//       message: `${role} created successfully`,
-//       user,
-//     });
-//   } catch (error) {
-//     console.error("Create user error:", error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
 import { User } from "../models/User.model.js";
-
-export const createAdminOrManager = async (req, res) => {
-  try {
-    const { fullName, email, department, role, avatar } = req.body;
-
-    // Validate role
-    if (!["admin", "manager"].includes(role)) {
-      return res.status(400).json({ message: "Invalid role" });
-    }
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: "User already exists" });
-    }
-
-    const user = await User.create({
-      fullName,
-      email,
-      department,
-      role,
-      avatar: avatar || {},
-      createdBy: null, // no creator since no auth
-    });
-
-    res.status(201).json({
-      message: `${role} created successfully`,
-      user,
-    });
-  } catch (error) {
-    console.error("Create user error:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-
-
-// Create Admin (no auth for first admin)
-
 import bcrypt from "bcryptjs";
-// Create Admin with password
-export const createAdmin = async (req, res) => {
+import jwt from "jsonwebtoken";
+
+// Public signup API
+export const signup = async (req, res) => {
   try {
-    const { fullName, email, department, password, avatar } = req.body;
+    const { fullName, email, password, role, department, companyId, assignedBrand, assignedPlan } = req.body;
 
-    if (!password) {
-      return res.status(400).json({ message: "Password is required" });
+    // Validate input
+    if (!fullName || !email || !password || !role) {
+      return res.status(400).json({ message: "fullName, email, password and role are required" });
     }
 
-    // Check if admin already exists
-    const existingAdmin = await User.findOne({ role: "admin" });
-    if (existingAdmin) {  
-      return res.status(400).json({ message: "Admin already exists" });
+    // Check if email exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(409).json({ message: "Email already registered" });
+
+    // If admin, ensure company is unique
+    if (role === "admin" && companyId) {
+      const existingAdminInCompany = await User.findOne({ role: "admin", companyId });
+      if (existingAdminInCompany) return res.status(400).json({ message: "Admin already exists for this company" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const admin = await User.create({
+    const newUser = await User.create({
       fullName,
       email,
       password: hashedPassword,
-      department,
-      role: "admin",
-      avatar: avatar || {},
-      createdBy: null,
+      role,
+      department: department || null,
+      companyId: companyId || null,
+      assignedBrand: assignedBrand || null,
+      assignedPlan: assignedPlan || "free",
+      createdBy: null, // first admin or self-signup
     });
 
+    const token = jwt.sign({ userId: newUser._id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: "1d" });
+
     res.status(201).json({
-      message: "Admin created successfully",
-      admin: {
-        _id: admin._id,
-        fullName: admin.fullName,
-        email: admin.email,
-        department: admin.department,
-        role: admin.role,
-        avatar: admin.avatar,
-        status: admin.status,
-      },
+      message: `${role} created successfully`,
+      token,
+      user: newUser,
     });
   } catch (error) {
-    console.error("Create admin error:", error);
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
+
+
+
+export const addUserByAdmin = async (req, res) => {
+  try {
+    const { fullName, email, password, role, department, assignedBrand, assignedPlan } = req.body;
+
+    // Only admin can create
+    if (req.userRole !== "admin") {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    if (!["manager", "employee"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role for admin creation" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(409).json({ message: "Email already registered" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await User.create({
+      fullName,
+      email,
+      password: hashedPassword,
+      role,
+      department: department || null,
+      companyId: req.userCompanyId, // inherited from admin
+      assignedBrand: assignedBrand || null,
+      assignedPlan: assignedPlan || "free",
+      createdBy: req.userId,
+    });
+
+    res.status(201).json({
+      message: `${role} created successfully by admin`,
+      user: newUser,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/**
+ * GET /api/users/me
+ */
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/**
+ * Patch /api/users/me
+ */
+export const updateMe = async (req, res) => {
+  try {
+    const allowedUpdates = ["fullName", "department", "avatar"];
+    const updates = {};
+
+    allowedUpdates.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.userId,
+      updates,
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/**
+ * DELETE /api/users/me
+ */
+export const deleteMe = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.userId);
+    res.status(200).json({ message: "User account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
