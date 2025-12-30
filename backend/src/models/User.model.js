@@ -11,7 +11,11 @@ const userSchema = new mongoose.Schema({
     public_id: { type: String, default: null },
     url: { type: String, default: null },
   },
-
+  phoneNumber: { 
+    type: String, 
+    required: false,   // optional at signup
+    trim: true,
+  },
   role: {
     type: String,
     enum: ["admin", "manager", "employee"],
@@ -31,11 +35,11 @@ const userSchema = new mongoose.Schema({
   },
 
   assignedBrand: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Brand",
-    default: null,
-    index: true,
-  },
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Brand",
+  default: null,
+  index: true,
+},
 
   assignedPlan: {
     type: String,
@@ -47,9 +51,10 @@ const userSchema = new mongoose.Schema({
   company: { 
   type: mongoose.Schema.Types.ObjectId, 
   ref: "Company", 
-  required: true, 
+  required: false,   // optional now
   index: true 
 },
+
 
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
 }, { timestamps: true });

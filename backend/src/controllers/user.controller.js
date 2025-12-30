@@ -5,7 +5,8 @@ import jwt from "jsonwebtoken";
 // Public signup API
 export const signup = async (req, res) => {
   try {
-    const { fullName, email, password, role, department, companyId, assignedBrand, assignedPlan } = req.body;
+        // console.log("Request body:", req.body);
+const { fullName, email, password, role, department, phoneNumber, companyId, assignedBrand, assignedPlan } = req.body;
 
     // Validate input
     if (!fullName || !email || !password || !role) {
@@ -16,25 +17,27 @@ export const signup = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(409).json({ message: "Email already registered" });
 
-    // If admin, ensure company is unique
-    if (role === "admin" && companyId) {
-      const existingAdminInCompany = await User.findOne({ role: "admin", companyId });
-      if (existingAdminInCompany) return res.status(400).json({ message: "Admin already exists for this company" });
-    }
+    // // If admin, ensure company is unique
+    // if (role === "admin" && companyId) {
+    //   const existingAdminInCompany = await User.findOne({ role: "admin", companyId });
+    //   if (existingAdminInCompany) return res.status(400).json({ message: "Admin already exists for this company" });
+    // }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({
-      fullName,
-      email,
-      password: hashedPassword,
-      role,
-      department: department || null,
-      companyId: companyId || null,
-      assignedBrand: assignedBrand || null,
-      assignedPlan: assignedPlan || "free",
-      createdBy: null, // first admin or self-signup
-    });
+   const newUser = await User.create({
+  fullName,
+  email,
+  password: hashedPassword,
+  role,
+  department: department || null,
+  phoneNumber: phoneNumber || null,   // added here
+  company: companyId || null,
+  assignedBrand: assignedBrand || null,
+  assignedPlan: assignedPlan || "free",
+  createdBy: null,
+});
+
 
     const token = jwt.sign({ userId: newUser._id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
@@ -49,8 +52,25 @@ export const signup = async (req, res) => {
   }
 };
 
+export const updateCompany = async (req, res) => {
+  try {
+    const { userId } = req.params; // e.g., /api/users/:userId/company
+    const { companyName } = req.body;
 
+    if (!companyName) return res.status(400).json({ message: "Company name is required" });
 
+    // Create company
+    const company = await Company.create({ name: companyName, createdBy: userId });
+
+    // Assign company to user
+    const user = await User.findByIdAndUpdate(userId, { company: company._id }, { new: true });
+
+    res.status(200).json({ message: "Company added", user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 export const addUserByAdmin = async (req, res) => {
   try {
@@ -93,9 +113,8 @@ export const addUserByAdmin = async (req, res) => {
   }
 };
 
-/**
- * GET /api/users/me
- */
+
+// GET /api/users/me
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.userId).select("-password");
@@ -109,12 +128,11 @@ export const getMe = async (req, res) => {
   }
 };
 
-/**
- * Patch /api/users/me
- */
+// Patch /api/users/me
+ 
 export const updateMe = async (req, res) => {
   try {
-    const allowedUpdates = ["fullName", "department", "avatar"];
+    const allowedUpdates = ["fullName", "department", "avatar", "phoneNumber"];
     const updates = {};
 
     allowedUpdates.forEach((field) => {
