@@ -74,120 +74,48 @@ export const login = async (req, res) => {
 };
 
 
-export const forgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ message: "Email is required" });
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res
-        .status(200)
-        .json({ message: "If email exists, OTP has been sent" });
-    }
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    await ResetTokenModels.deleteMany({ userId: user._id });
-
-    const hashedOtp = await bcrypt.hash(otp, 10);
-
-    await ResetTokenModels.create({
-      userId: user._id,
-      otpHash: hashedOtp,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-    });
-
-    // ===== Ethereal setup =====
-    const testAccount = await nodemailer.createTestAccount();
-
-    const transporter = nodemailer.createTransport({
-      host: testAccount.smtp.host,
-      port: testAccount.smtp.port,
-      secure: testAccount.smtp.secure, // true for 465, false for other ports
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-    });
-
-    const info = await transporter.sendMail({
-      from: `"HintsWork Support" <${testAccount.user}>`,
-      to: user.email,
-      subject: "Your Password Reset OTP",
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height:1.6;">
-          <h2>Password Reset</h2>
-          <p>Use the OTP below to reset your password:</p>
-          <h1 style="letter-spacing:4px;">${otp}</h1>
-          <p>This OTP is valid for <strong>10 minutes</strong>.</p>
-          <p>If you didn’t request this, you can safely ignore this email.</p>
-          <br/>
-          <small>— HintsWork Team</small>
-        </div>
-      `,
-    });
-
-    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-
-    res.status(200).json({
-      message: "OTP sent successfully",
-      previewUrl: nodemailer.getTestMessageUrl(info), // For testing only
-    });
-
-  } catch (error) {
-    console.error("Forgot Password Error:", error);
-    res.status(500).json({ message: "Failed to send OTP" });
-  }
-};
-
 // export const forgotPassword = async (req, res) => {
 //   try {
 //     const { email } = req.body;
 
-//     // 1️⃣ Validate input
 //     if (!email) {
 //       return res.status(400).json({ message: "Email is required" });
 //     }
 
-//     // 2️⃣ Find user
 //     const user = await User.findOne({ email });
 //     if (!user) {
-//       // Do NOT reveal whether email exists (security best practice)
-//       return res.status(200).json({ message: "If email exists, OTP has been sent" });
+//       return res
+//         .status(200)
+//         .json({ message: "If email exists, OTP has been sent" });
 //     }
 
-//     // 3️⃣ Generate OTP
 //     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-//     // 4️⃣ Remove old OTPs
 //     await ResetTokenModels.deleteMany({ userId: user._id });
 
-//     // 5️⃣ Hash OTP
 //     const hashedOtp = await bcrypt.hash(otp, 10);
 
-//     // 6️⃣ Save OTP
 //     await ResetTokenModels.create({
 //       userId: user._id,
 //       otpHash: hashedOtp,
-//       expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+//       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
 //     });
 
-//     // 7️⃣ Email transporter (same credentials)
+//     // ===== Ethereal setup =====
+//     const testAccount = await nodemailer.createTestAccount();
+
 //     const transporter = nodemailer.createTransport({
-//       service: "gmail",
+//       host: testAccount.smtp.host,
+//       port: testAccount.smtp.port,
+//       secure: testAccount.smtp.secure, // true for 465, false for other ports
 //       auth: {
-//         user: process.env.EMAIL_USER,
-//         pass: process.env.EMAIL_PASS,
+//         user: testAccount.user,
+//         pass: testAccount.pass,
 //       },
 //     });
 
-//     // 8️⃣ Send email
-//     await transporter.sendMail({
-//       from: `"HintsWork Support" <${process.env.EMAIL_USER}>`,
+//     const info = await transporter.sendMail({
+//       from: `"HintsWork Support" <${testAccount.user}>`,
 //       to: user.email,
 //       subject: "Your Password Reset OTP",
 //       html: `
@@ -203,14 +131,86 @@ export const forgotPassword = async (req, res) => {
 //       `,
 //     });
 
-//     // 9️⃣ Response
-//     res.status(200).json({ message: "OTP sent successfully" });
+//     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+
+//     res.status(200).json({
+//       message: "OTP sent successfully",
+//       previewUrl: nodemailer.getTestMessageUrl(info), // For testing only
+//     });
 
 //   } catch (error) {
 //     console.error("Forgot Password Error:", error);
 //     res.status(500).json({ message: "Failed to send OTP" });
 //   }
 // };
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // 1️⃣ Validate input
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    // 2️⃣ Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Do NOT reveal whether email exists (security best practice)
+      return res.status(200).json({ message: "If email exists, OTP has been sent" });
+    }
+
+    // 3️⃣ Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 4️⃣ Remove old OTPs
+    await ResetTokenModels.deleteMany({ userId: user._id });
+
+    // 5️⃣ Hash OTP
+    const hashedOtp = await bcrypt.hash(otp, 10);
+
+    // 6️⃣ Save OTP
+    await ResetTokenModels.create({
+      userId: user._id,
+      otpHash: hashedOtp,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+    });
+
+    // 7️⃣ Email transporter (same credentials)
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // 8️⃣ Send email
+    await transporter.sendMail({
+      from: `"HintsWork Support" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: "Your Password Reset OTP",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height:1.6;">
+          <h2>Password Reset</h2>
+          <p>Use the OTP below to reset your password:</p>
+          <h1 style="letter-spacing:4px;">${otp}</h1>
+          <p>This OTP is valid for <strong>10 minutes</strong>.</p>
+          <p>If you didn’t request this, you can safely ignore this email.</p>
+          <br/>
+          <small>— HintsWork Team</small>
+        </div>
+      `,
+    });
+
+    // 9️⃣ Response
+    res.status(200).json({ message: "OTP sent successfully" });
+
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    res.status(500).json({ message: "Failed to send OTP" });
+  }
+};
 
 export const verifyOtp = async (req, res) => {
   try {
