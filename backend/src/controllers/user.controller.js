@@ -60,66 +60,52 @@ const { fullName, email, password, role, department, phoneNumber, companyId, ass
   }
 };
 
-export const updateCompany = async (req, res) => {
-  try {
-    const { userId } = req.params; // e.g., /api/users/:userId/company
-    const { companyName } = req.body;
+// export const updateCompany = async (req, res) => {
+//   try {
+//     const { userId } = req.params; // e.g., /api/users/:userId/company
+//     const { companyName } = req.body;
 
-    if (!companyName) return res.status(400).json({ message: "Company name is required" });
+//     if (!companyName) return res.status(400).json({ message: "Company name is required" });
 
-    // Create company
-    const company = await Company.create({ name: companyName, createdBy: userId });
+//     // Create company
+//     const company = await Company.create({ name: companyName, createdBy: userId });
 
-    // Assign company to user
-    const user = await User.findByIdAndUpdate(userId, { company: company._id }, { new: true });
+//     // Assign company to user
+//     const user = await User.findByIdAndUpdate(userId, { company: company._id }, { new: true });
 
-    res.status(200).json({ message: "Company added", user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
+//     res.status(200).json({ message: "Company added", user });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+export const addemployee = async (req, res) => {
+  const { fullName, email, password, department } = req.body;
+
+  const existing = await User.findOne({
+    email,
+    companyId: req.user.companyId
+  });
+
+  if (existing)
+    return res.status(409).json({ message: "User already exists in company" });
+
+  const hashed = await bcrypt.hash(password, 10);
+
+  const employee = await User.create({
+    fullName,
+    email,
+    password: hashed,
+    role: "employee",
+    department,
+    companyId: req.user.companyId,
+    createdBy: req.user.userId
+  });
+
+  res.status(201).json({ message: "Employee created", employee });
 };
 
-export const addUserByAdmin = async (req, res) => {
-  try {
-    const { fullName, email, password, role, department, assignedBrand, assignedPlan } = req.body;
-
-    // Only admin can create
-    if (req.userRole !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
-
-    if (!["manager", "employee"].includes(role)) {
-      return res.status(400).json({ message: "Invalid role for admin creation" });
-    }
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(409).json({ message: "Email already registered" });
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await User.create({
-      fullName,
-      email,
-      password: hashedPassword,
-      role,
-      department: department || null,
-      company: req.userCompanyId, // inherited from admin
-      assignedBrand: assignedBrand || null,
-      assignedPlan: assignedPlan || "free",
-      createdBy: req.userId,
-    });
-
-    res.status(201).json({
-      message: `${role} created successfully by admin`,
-      user: newUser,
-    });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
 // GET /api/users/me
 export const getMe = async (req, res) => {
   try {

@@ -6,143 +6,81 @@ import nodemailer from "nodemailer";
 import {ResetToken } from "../models/ResetToken.model.js";
 
 
+export const adminSignup = async (req, res) => {
+  const { fullName, email, password, companyName } = req.body;
+
+  const company = await Company.create({ name: companyName });
+
+  const hashed = await bcrypt.hash(password, 10);
+
+  const admin = await User.create({
+    fullName,
+    email,
+    password: hashed,
+    role: "admin",
+    companyId: company._id
+  });
+
+  const token = jwt.sign(
+    { userId: admin._id, role: admin.role, companyId: company._id },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  res.status(201).json({ token, admin, company });
+};
+
 
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, companyId } = req.body;
 
-    // 1. Validate input
-    if (!email || !password) {
-      return res.status(400).json({
-        message: "Email and password are required",
-      });
+    if (!email || !password || !companyId) {
+      return res.status(400).json({ message: "Email, password and company are required" });
     }
 
-    // 2. Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, companyId }).select("+password");
     if (!user) {
-      return res.status(401).json({
-        message: "Invalid email or password",
-      });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // 3. Check status
     if (user.status !== "active") {
-      return res.status(403).json({
-        message: "Account is inactive",
-      });
+      return res.status(403).json({ message: "Account inactive" });
     }
 
-    // 4. Compare password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        message: "Invalid email or password",
-      });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // 5. Generate JWT
     const token = jwt.sign(
       {
         userId: user._id,
         role: user.role,
+        companyId: user.companyId,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    // 6. Respond (never send password)
     res.status(200).json({
-      message: "Login successful",
       token,
       user: {
         id: user._id,
         fullName: user.fullName,
-        email: user.email,
         role: user.role,
-        department: user.department,
-        avatar: user.avatar,
+        points: user.points,
+        streak: user.streak,
+        companyId: user.companyId,
       },
     });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({
-      message: "Server error",
-    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-
-// export const forgotPassword = async (req, res) => {
-//   try {
-//     const { email } = req.body;
-
-//     if (!email) {
-//       return res.status(400).json({ message: "Email is required" });
-//     }
-
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res
-//         .status(200)
-//         .json({ message: "If email exists, OTP has been sent" });
-//     }
-
-//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-//     await ResetTokenModels.deleteMany({ userId: user._id });
-
-//     const hashedOtp = await bcrypt.hash(otp, 10);
-
-//     await ResetTokenModels.create({
-//       userId: user._id,
-//       otpHash: hashedOtp,
-//       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-//     });
-
-//     // ===== Ethereal setup =====
-//     const testAccount = await nodemailer.createTestAccount();
-
-//     const transporter = nodemailer.createTransport({
-//       host: testAccount.smtp.host,
-//       port: testAccount.smtp.port,
-//       secure: testAccount.smtp.secure, // true for 465, false for other ports
-//       auth: {
-//         user: testAccount.user,
-//         pass: testAccount.pass,
-//       },
-//     });
-
-//     const info = await transporter.sendMail({
-//       from: `"HintsWork Support" <${testAccount.user}>`,
-//       to: user.email,
-//       subject: "Your Password Reset OTP",
-//       html: `
-//         <div style="font-family: Arial, sans-serif; line-height:1.6;">
-//           <h2>Password Reset</h2>
-//           <p>Use the OTP below to reset your password:</p>
-//           <h1 style="letter-spacing:4px;">${otp}</h1>
-//           <p>This OTP is valid for <strong>10 minutes</strong>.</p>
-//           <p>If you didn’t request this, you can safely ignore this email.</p>
-//           <br/>
-//           <small>— HintsWork Team</small>
-//         </div>
-//       `,
-//     });
-
-//     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-
-//     res.status(200).json({
-//       message: "OTP sent successfully",
-//       previewUrl: nodemailer.getTestMessageUrl(info), // For testing only
-//     });
-
-//   } catch (error) {
-//     console.error("Forgot Password Error:", error);
-//     res.status(500).json({ message: "Failed to send OTP" });
-//   }
-// };
 
 export const forgotPassword = async (req, res) => {
   try {

@@ -25,6 +25,9 @@ const brandSchema = new mongoose.Schema(
       type: Number,
       default: 0, // cached value
     },
+    companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
+    isSystemBrand: { type: Boolean, default: true }
+
   },
   { timestamps: true }
 );

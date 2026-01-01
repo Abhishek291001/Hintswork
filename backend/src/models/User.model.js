@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["admin", "manager", "employee"],
+    enum: ["Superadmin", "admin", "employee"],
     default: "employee",
   },
 
@@ -28,42 +28,51 @@ const userSchema = new mongoose.Schema({
     default: "active",
   },
 
-  subscription: {
-    type: String,
-    enum: ["inactive", "active"],
-    default: "inactive",
-  },
+//   subscription: {
+//     type: String,
+//     enum: ["inactive", "active"],
+//     default: "inactive",
+//   },
 
-  assignedBrand: {
+//   assignedBrand: {
+//   type: mongoose.Schema.Types.ObjectId,
+//   ref: "Brand",
+//   default: null,
+//   index: true,
+// },
+
+//   assignedPlan: {
+//     type: String,
+//     enum: ["free", "starter", "pro"],
+//     default: "free",
+//     index: true,
+//   },
+
+  companyId: {
   type: mongoose.Schema.Types.ObjectId,
-  ref: "Brand",
-  default: null,
-  index: true,
+  ref: "Company",
+  required: true,
+  index: true
 },
 
-  assignedPlan: {
-    type: String,
-    enum: ["free", "starter", "pro"],
-    default: "free",
-    index: true,
-  },
 
-  company: { 
-  type: mongoose.Schema.Types.ObjectId, 
-  ref: "Company", 
-  required: false,   // optional now
-  index: true 
-},
+points: { type: Number, default: 0 },
+streak: { type: Number, default: 0 },
+lastCompletedSlot: { type: String }, // morning / evening / night
+
 
 
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
 }, { timestamps: true });
 
 // Text search index
-userSchema.index({
-  fullName: "text",
-  email: "text",
-  department: "text",
-});
+// userSchema.index({
+//   fullName: "text",
+//   email: "text",
+//   department: "text",
+// });
+
+userSchema.index({ email: 1, companyId: 1 }, { unique: true });
+
 
 export const User = mongoose.model("User", userSchema);

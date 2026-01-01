@@ -1,9 +1,17 @@
-import mongoose from "mongoose";
-
 const companySchema = new mongoose.Schema({
-  name: { type: String, required: true, unique: true }, // UNIQUE company name
-  subscriptionStatus: { type: String, enum: ["inactive", "active"], default: "inactive" },
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-}, { timestamps: true });
+  name: String,
+  domain: String,  // used for SSO later
 
-export const Company = mongoose.model("Company", companySchema);
+  branding: {
+    logo: String,
+    appName: String,
+    primaryColor: String,
+  },
+
+  defaultSlots: [
+    { name: String, start: String, end: String }
+  ],
+
+  planId: { type: mongoose.Schema.Types.ObjectId, ref: "Plan" }
+});
+
