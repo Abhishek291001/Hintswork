@@ -48,12 +48,13 @@ const userSchema = new mongoose.Schema({
 //     index: true,
 //   },
 
-  companyId: {
+ companyId: {
   type: mongoose.Schema.Types.ObjectId,
   ref: "Company",
-  required: true,
+  default: null,
   index: true
 },
+
 
 
 points: { type: Number, default: 0 },

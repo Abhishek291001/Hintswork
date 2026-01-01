@@ -30,30 +30,35 @@ export const adminSignup = async (req, res) => {
   res.status(201).json({ token, admin, company });
 };
 
-
-
 export const login = async (req, res) => {
   try {
-    const { email, password, companyId } = req.body;
+    const { email, password } = req.body;
 
-    if (!email || !password || !companyId) {
-      return res.status(400).json({ message: "Email, password and company are required" });
+    // 1️⃣ Validate
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
     }
 
-    const user = await User.findOne({ email, companyId }).select("+password");
+    // 2️⃣ Find user by email ONLY
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // 3️⃣ Check status
     if (user.status !== "active") {
       return res.status(403).json({ message: "Account inactive" });
     }
 
+    // 4️⃣ Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // 5️⃣ JWT (companyId from DB)
     const token = jwt.sign(
       {
         userId: user._id,
@@ -70,8 +75,6 @@ export const login = async (req, res) => {
         id: user._id,
         fullName: user.fullName,
         role: user.role,
-        points: user.points,
-        streak: user.streak,
         companyId: user.companyId,
       },
     });
@@ -80,6 +83,54 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// export const login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     if (!email || !password) {
+//       return res.status(400).json({ message: "Email and password are required" });
+//     }
+
+//     // 🔹 Find user by email only
+//     const user = await User.findOne({ email }).select("+password");
+//     if (!user) {
+//       return res.status(401).json({ message: "Invalid credentials" });
+//     }
+
+//     if (user.status !== "active") {
+//       return res.status(403).json({ message: "Account inactive" });
+//     }
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       return res.status(401).json({ message: "Invalid credentials" });
+//     }
+
+//     const token = jwt.sign(
+//       {
+//         userId: user._id,
+//         role: user.role,
+//         companyId: user.companyId,
+//       },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "1d" }
+//     );
+
+//     res.status(200).json({
+//       token,
+//       user: {
+//         id: user._id,
+//         fullName: user.fullName,
+//         role: user.role,
+//         companyId: user.companyId,
+//       },
+//     });
+//   } catch (err) {
+//     console.error("Login error:", err);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
 
 
 export const forgotPassword = async (req, res) => {

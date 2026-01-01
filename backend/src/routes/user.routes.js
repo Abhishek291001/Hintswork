@@ -9,7 +9,7 @@ import {
   updateMe,
   deleteMe,
   signup,
-  addemployee,
+  addEmployee,
   
 } from "../controllers/user.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -22,7 +22,7 @@ const router = express.Router();
 router.post("/signup", signup);
 
 // Admin adds manager/employee
-router.post("/users", authMiddleware, addemployee);
+router.post("/addEmployee", authMiddleware, addEmployee);
 // Logged-in user routes
 router.get("/me", authMiddleware, getMe);
 router.patch("/me", authMiddleware, updateMe);
