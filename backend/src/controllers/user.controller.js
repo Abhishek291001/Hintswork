@@ -3,69 +3,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Company } from "../models/Company.model.js";
 
-// Public signup API
-// export const signup = async (req, res) => {
-//   try {
-//         // console.log("Request body:", req.body);
-// const { fullName, email, password, role, department, phoneNumber, companyId, assignedBrand, assignedPlan } = req.body;
-
-//     // Validate input
-//     if (!fullName || !email || !password || !role) {
-//       return res.status(400).json({ message: "fullName, email, password and role are required" });
-//     }
-
-//     // Check if email exists
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) return res.status(409).json({ message: "Email already registered" });
-
-//     // // If admin, ensure company is unique
-//     // if (role === "admin" && companyId) {
-//     //   const existingAdminInCompany = await User.findOne({ role: "admin", companyId });
-//     //   if (existingAdminInCompany) return res.status(400).json({ message: "Admin already exists for this company" });
-//     // }
-// if (!companyId) {
-//   return res.status(400).json({ message: "Company ID is required" });
-// }
-
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//    const newUser = await User.create({
-//   fullName,
-//   email,
-//   password: hashedPassword,
-//   role,
-//   department: department || null,
-//   phoneNumber: phoneNumber || null,   // added here
-//   companyId: companyId,
-//   assignedBrand: assignedBrand || null,
-//   assignedPlan: assignedPlan || "free",
-//   createdBy: null,
-// });
-
-
-//     const token = jwt.sign(
-//   {
-//     userId: newUser._id,
-//     role: newUser.role,
-//     companyId: newUser.companyId, // ✅ correct
-//   },
-//   process.env.JWT_SECRET,
-//   { expiresIn: "1d" }
-// );
-
-
-//     res.status(201).json({
-//       message: `${role} created successfully`,
-//       token,
-//       user: newUser,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-
 
 export const signup = async (req, res) => {
   try {
@@ -128,25 +65,57 @@ export const signup = async (req, res) => {
   }
 };
 
-// export const updateCompany = async (req, res) => {
-//   try {
-//     const { userId } = req.params; // e.g., /api/users/:userId/company
-//     const { companyName } = req.body;
+export const getEmployees = async (req, res) => {
+  try {
+    if (req.user.role !== "admin")
+      return res.status(403).json({ message: "Only admin allowed" });
 
-//     if (!companyName) return res.status(400).json({ message: "Company name is required" });
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit) || 10, 30);
+    const search = req.query.search?.trim();
+    const skip = (page - 1) * limit;
 
-//     // Create company
-//     const company = await Company.create({ name: companyName, createdBy: userId });
+    const filter = {
+      role: "employee",
+      companyId: req.user.companyId,
+      createdBy: req.user.userId,
+      status: "active"
+    };
 
-//     // Assign company to user
-//     const user = await User.findByIdAndUpdate(userId, { company: company._id }, { new: true });
+    if (search) {
+      filter.$or = [
+        { fullName: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { department: { $regex: search, $options: "i" } }
+      ];
+    }
 
-//     res.status(200).json({ message: "Company added", user });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
+    const [employees, total] = await Promise.all([
+      User.find(filter)
+        .select("-password")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      User.countDocuments(filter)
+    ]);
+
+    res.status(200).json({
+      employees,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+
+  } catch (err) {
+    console.error("Fetch employees error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 export const addEmployee = async (req, res) => {
   const { fullName, email, password, department } = req.body;

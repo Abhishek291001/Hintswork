@@ -73,7 +73,8 @@ lastCompletedSlot: { type: String }, // morning / evening / night
 //   department: "text",
 // });
 
-userSchema.index({ email: 1, companyId: 1 }, { unique: true });
+// userSchema.index({ email: 1, companyId: 1 }, { unique: true });
 
+userSchema.index({ companyId: 1, createdBy: 1, role: 1, status: 1 });
 
 export const User = mongoose.model("User", userSchema);
