@@ -146,16 +146,20 @@ export const addEmployee = async (req, res) => {
 // GET /api/users/me
 export const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select("-password");
+    const user = await User.findById(req.user.userId).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json(user);
+
+    // ✅ Wrap in { user: ... } for frontend consistency
+    res.status(200).json({ user });
   } catch (error) {
+    console.error("getMe error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 // Patch /api/users/me
  
 export const updateMe = async (req, res) => {
