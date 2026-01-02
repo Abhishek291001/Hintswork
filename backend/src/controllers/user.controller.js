@@ -142,7 +142,98 @@ export const addEmployee = async (req, res) => {
 
   res.status(201).json({ message: "Employee created", employee });
 };
+export const getEmployeeById = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    let filter = { _id: id, role: "employee" };
+
+    // Admin → only own created employees
+    if (req.user.role === "admin") {
+      filter.companyId = req.user.companyId;
+      filter.createdBy = req.user.userId;
+    }
+
+    // Superadmin → all employees
+    if (req.user.role !== "admin" && req.user.role !== "Superadmin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const employee = await User.findOne(filter).select("-password");
+
+    if (!employee)
+      return res.status(404).json({ message: "Employee not found or unauthorized" });
+
+    res.status(200).json(employee);
+
+  } catch (err) {
+    console.error("Get employee error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const updateEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fullName, department, status } = req.body;
+
+    let filter = { _id: id, role: "employee" };
+
+    if (req.user.role === "admin") {
+      filter.companyId = req.user.companyId;
+      filter.createdBy = req.user.userId;
+    }
+
+    if (req.user.role !== "admin" && req.user.role !== "Superadmin")
+      return res.status(403).json({ message: "Access denied" });
+
+    const employee = await User.findOneAndUpdate(
+      filter,
+      { $set: { fullName, department, status } },
+      { new: true }
+    ).select("-password");
+
+    if (!employee)
+      return res.status(404).json({ message: "Employee not found or unauthorized" });
+
+    res.status(200).json({ message: "Employee updated", employee });
+
+  } catch (err) {
+    console.error("Update employee error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const deleteEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    let filter = { _id: id, role: "employee" };
+
+    if (req.user.role === "admin") {
+      filter.companyId = req.user.companyId;
+      filter.createdBy = req.user.userId;
+    }
+
+    if (req.user.role !== "admin" && req.user.role !== "Superadmin")
+      return res.status(403).json({ message: "Access denied" });
+
+    const employee = await User.findOneAndUpdate(
+      filter,
+      { status: "inactive" },
+      { new: true }
+    );
+
+    if (!employee)
+      return res.status(404).json({ message: "Employee not found or unauthorized" });
+
+    res.status(200).json({ message: "Employee deleted successfully" });
+
+  } catch (err) {
+    console.error("Delete employee error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 // GET /api/users/me
 export const getMe = async (req, res) => {
   try {
@@ -181,9 +272,8 @@ export const updateMe = async (req, res) => {
   }
 };
 
-/**
- * DELETE /api/users/me
- */
+// DELETE /api/users/me
+ 
 export const deleteMe = async (req, res) => {
   try {
     await User.findByIdAndDelete(req.userId);
@@ -192,3 +282,4 @@ export const deleteMe = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
