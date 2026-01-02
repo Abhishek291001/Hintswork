@@ -78,8 +78,8 @@ export const getEmployees = async (req, res) => {
     const filter = {
       role: "employee",
       companyId: req.user.companyId,
-      createdBy: req.user.userId,
-      status: "active"
+      createdBy: req.user.userId
+      // status: "active"
     };
 
     if (search) {
@@ -142,32 +142,46 @@ export const addEmployee = async (req, res) => {
 
   res.status(201).json({ message: "Employee created", employee });
 };
+// export const getEmployeeById = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     let filter = { _id: id, role: "employee" };
+
+//     // Admin → only own created employees
+//     if (req.user.role === "admin") {
+//       filter.companyId = req.user.companyId;
+//       filter.createdBy = req.user.userId;
+//     }
+
+//     // Superadmin → all employees
+//     if (req.user.role !== "admin" && req.user.role !== "Superadmin") {
+//       return res.status(403).json({ message: "Access denied" });
+//     }
+
+//     const employee = await User.findOne(filter).select("-password");
+
+//     if (!employee)
+//       return res.status(404).json({ message: "Employee not found or unauthorized" });
+
+//     res.status(200).json(employee);
+
+//   } catch (err) {
+//     console.error("Get employee error:", err);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
 export const getEmployeeById = async (req, res) => {
   try {
     const { id } = req.params;
+    const employee = await User.findOne({ _id: id, role: "employee", companyId: req.user.companyId })
+      .select("-password"); // _id is included by default
 
-    let filter = { _id: id, role: "employee" };
+    if (!employee) return res.status(404).json({ message: "Employee not found" });
 
-    // Admin → only own created employees
-    if (req.user.role === "admin") {
-      filter.companyId = req.user.companyId;
-      filter.createdBy = req.user.userId;
-    }
-
-    // Superadmin → all employees
-    if (req.user.role !== "admin" && req.user.role !== "Superadmin") {
-      return res.status(403).json({ message: "Access denied" });
-    }
-
-    const employee = await User.findOne(filter).select("-password");
-
-    if (!employee)
-      return res.status(404).json({ message: "Employee not found or unauthorized" });
-
-    res.status(200).json(employee);
-
+    res.status(200).json(employee); // send full object
   } catch (err) {
-    console.error("Get employee error:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -208,32 +222,38 @@ export const deleteEmployee = async (req, res) => {
   try {
     const { id } = req.params;
 
-    let filter = { _id: id, role: "employee" };
+    // 🔐 Authorization
+    if (req.user.role !== "admin" && req.user.role !== "superadmin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
 
+    const filter = {
+      _id: id,
+      role: "employee",
+      companyId: req.user.companyId
+    };
+
+    // Optional: enforce createdBy only for admin
     if (req.user.role === "admin") {
-      filter.companyId = req.user.companyId;
       filter.createdBy = req.user.userId;
     }
 
-    if (req.user.role !== "admin" && req.user.role !== "Superadmin")
-      return res.status(403).json({ message: "Access denied" });
+    const employee = await User.findOneAndDelete(filter);
 
-    const employee = await User.findOneAndUpdate(
-      filter,
-      { status: "inactive" },
-      { new: true }
-    );
+    if (!employee) {
+      return res
+        .status(404)
+        .json({ message: "Employee not found or unauthorized" });
+    }
 
-    if (!employee)
-      return res.status(404).json({ message: "Employee not found or unauthorized" });
-
-    res.status(200).json({ message: "Employee deleted successfully" });
+    res.status(200).json({ message: "Employee deleted permanently" });
 
   } catch (err) {
     console.error("Delete employee error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 // GET /api/users/me
 export const getMe = async (req, res) => {
   try {

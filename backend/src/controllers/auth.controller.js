@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 
 import {ResetToken } from "../models/ResetToken.model.js";
+import {Company} from "../models/Company.model.js"; 
 
 
 export const adminSignup = async (req, res) => {

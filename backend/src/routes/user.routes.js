@@ -15,7 +15,7 @@ import { authMiddleware } from "../middleware/auth.middleware.js";
 
 
 const router = express.Router();
-
+router.patch("/editEmployees/:id", authMiddleware, updateEmployee);
 
 // Public signup (first admin or self-registration)
 router.post("/signup", signup);
@@ -23,7 +23,7 @@ router.get("/employees", authMiddleware, getEmployees);
 
 // Admin adds manager/employee
 router.post("/addEmployee", authMiddleware, addEmployee);
-router.patch("/employees/:id", authMiddleware, updateEmployee);
+
 router.delete("/employees/:id", authMiddleware, deleteEmployee);
 router.get("/employees/:id", authMiddleware, getEmployeeById);
 
