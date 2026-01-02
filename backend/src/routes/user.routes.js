@@ -6,6 +6,9 @@ import {
   signup,
   addEmployee,
   getEmployees,
+  getEmployeeById,
+  deleteEmployee,
+  updateEmployee,
   
 } from "../controllers/user.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";

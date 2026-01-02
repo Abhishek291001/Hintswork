@@ -5,6 +5,7 @@ import cors from "cors";
 import connectDB from "./src/db/db.js";
 import userRoutes from "./src/routes/user.routes.js";
 import authRoutes from "./src/routes/auth.routes.js";
+import companyRoutes from "./src/routes/company.routes.js";
 const app = express();
 connectDB();
 
@@ -14,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-
+app.use("/api/company", companyRoutes );
 app.get("/", (req, res) => res.send("Server is running..."));
 
 const PORT = process.env.PORT || 5000;

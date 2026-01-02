@@ -1,24 +1,8 @@
-// const companySchema = new mongoose.Schema({
-//   name: String,
-//   domain: String,  // used for SSO later
-
-//   branding: {
-//     logo: String,
-//     appName: String,
-//     primaryColor: String,
-//   },
-
-//   defaultSlots: [
-//     { name: String, start: String, end: String }
-//   ],
-
-//   planId: { type: mongoose.Schema.Types.ObjectId, ref: "Plan" }
-// });
 import mongoose from "mongoose";
 
 const companySchema = new mongoose.Schema({
-  name: { type: String },
-  domain: { type: String },
+  name: { type: String, trim: true },
+  domain: { type: String, lowercase: true },
 
   branding: {
     logo: String,
@@ -32,16 +16,19 @@ const companySchema = new mongoose.Schema({
     default: "incomplete",
   },
 
+  planId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Plan",
+    default: null,
+  },
+
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-
-  planId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Plan",
-  },
 }, { timestamps: true });
 
+
 export const Company = mongoose.model("Company", companySchema);
+

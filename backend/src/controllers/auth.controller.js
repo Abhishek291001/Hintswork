@@ -36,29 +36,40 @@ export const login = async (req, res) => {
 
     // 1️⃣ Validate
     if (!email || !password) {
-      return res.status(400).json({
-        message: "Email and password are required",
-      });
+      return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // 2️⃣ Find user by email ONLY
+    // 2️⃣ Find user
     const user = await User.findOne({ email }).select("+password");
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+    if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
-    // 3️⃣ Check status
+    // 3️⃣ Check account status
     if (user.status !== "active") {
       return res.status(403).json({ message: "Account inactive" });
     }
 
     // 4️⃣ Compare password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+    if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
+
+    // 5️⃣ Load company subscription
+    let company = null;
+
+    if (user.companyId) {
+      company = await Company.findById(user.companyId)
+        .select("planId status");
     }
 
-    // 5️⃣ JWT (companyId from DB)
+    // 6️⃣ Employees blocked if company has no active plan
+    if (user.role === "employee") {
+      if (!company || company.status !== "active" || !company.planId) {
+        return res.status(403).json({
+          message: "Company subscription inactive"
+        });
+      }
+    }
+
+    // 7️⃣ Generate token
     const token = jwt.sign(
       {
         userId: user._id,
@@ -77,7 +88,9 @@ export const login = async (req, res) => {
         role: user.role,
         companyId: user.companyId,
       },
+      companyPlan: company?.planId || null
     });
+
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Server error" });
@@ -131,7 +144,6 @@ export const login = async (req, res) => {
 //     res.status(500).json({ message: "Server error" });
 //   }
 // };
-
 
 export const forgotPassword = async (req, res) => {
   try {
@@ -244,7 +256,6 @@ export const verifyOtp = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 export const resetPassword = async (req, res) => {
   try {
