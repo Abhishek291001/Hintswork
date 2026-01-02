@@ -145,7 +145,7 @@ export const login = async (req, res) => {
 //     res.status(500).json({ message: "Server error" });
 //   }
 // };
-
+   
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;

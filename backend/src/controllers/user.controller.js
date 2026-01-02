@@ -186,6 +186,62 @@ export const getEmployeeById = async (req, res) => {
   }
 };
 
+// GET /api/admin/employees/streaks?page=1&limit=20
+export const getEmployeeStreaks = async (req,res) => {
+
+  if (req.user.role !== "admin")
+    return res.status(403).json({ message: "Access denied" });
+
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 20;
+  const skip = (page-1)*limit;
+
+  const employees = await User.find({
+    companyId: req.user.companyId,
+    role: "employee",
+    createdBy: req.user.userId
+  })
+  .select("fullName email streak points lastCompletedSlot")
+  .skip(skip)
+  .limit(limit);
+
+  const total = await User.countDocuments({
+    companyId: req.user.companyId,
+    role: "employee",
+    createdBy: req.user.userId
+  });
+
+  res.json({ employees, total });
+};
+// GET /api/admin/company/analytics
+export const getCompanyAnalytics = async (req,res) => {
+
+  const today = new Date(Date.now() - 24*60*60*1000);
+
+  const activeUsers = await User.countDocuments({
+    companyId: req.user.companyId,
+    role: "employee",
+    status: "active"
+  });
+
+  const todayCompleted = await SlotAssignment.distinct("userId", {
+    companyId: req.user.companyId,
+    isCompleted: true,
+    createdAt: { $gte: today }
+  });
+
+  const avgStreak = await User.aggregate([
+    { $match: { companyId: req.user.companyId, role: "employee" }},
+    { $group: { _id:null, avg:{ $avg:"$streak" }}}
+  ]);
+
+  res.json({
+    totalEmployees: activeUsers,
+    todayEngagedUsers: todayCompleted.length,
+    avgStreak: avgStreak[0]?.avg || 0
+  });
+};
+
 export const updateEmployee = async (req, res) => {
   try {
     const { id } = req.params;
