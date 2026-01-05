@@ -4,6 +4,7 @@ import { forgotPassword, login, resetPassword, verifyOtp } from "../controllers/
 const router = express.Router();
 
 router.post("/login", login);
+// router.post("/adminSignup", adminSignup);
 
 router.post("/forgot-password", forgotPassword);
 router.post("/verify-otp", verifyOtp);

@@ -9,7 +9,6 @@ import {
   getEmployeeById,
   deleteEmployee,
   updateEmployee,
-  
 } from "../controllers/user.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
@@ -21,7 +20,7 @@ router.patch("/editEmployees/:id", authMiddleware, updateEmployee);
 router.post("/signup", signup);
 router.get("/employees", authMiddleware, getEmployees);
 
-// Admin adds manager/employee
+// Admin adds manager/employee 
 router.post("/addEmployee", authMiddleware, addEmployee);
 
 router.delete("/employees/:id", authMiddleware, deleteEmployee);

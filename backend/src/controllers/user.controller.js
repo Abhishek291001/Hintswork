@@ -328,7 +328,6 @@ export const getMe = async (req, res) => {
 };
 
 // Patch /api/users/me
- 
 export const updateMe = async (req, res) => {
   try {
     const allowedUpdates = ["fullName", "department", "avatar", "phoneNumber"];
@@ -353,7 +352,6 @@ export const updateMe = async (req, res) => {
 };
 
 // DELETE /api/users/me
- 
 export const deleteMe = async (req, res) => {
   try {
     await User.findByIdAndDelete(req.userId);

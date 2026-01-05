@@ -2,13 +2,19 @@ import mongoose from "mongoose";
 
 const brandSchema = new mongoose.Schema(
   {
+    // name: {
+    //   type: String,
+    //   required: true,
+    //   unique: true,
+    //   trim: true,
+    //   index: true,
+    // },
     name: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      index: true,
-    },
+  type: String,
+  required: true,
+  trim: true,
+},
+
 
     shortDescription: {
       type: String,
@@ -31,5 +37,7 @@ const brandSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+brandSchema.index({ name: 1, companyId: 1 }, { unique: true });
 
 export const Brand = mongoose.model("Brand", brandSchema);

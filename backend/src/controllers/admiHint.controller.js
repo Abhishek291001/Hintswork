@@ -1,6 +1,5 @@
 import { Hint } from "../models/hint.model.js";
 
-
 export const getCurrentSlot = async (req,res) => {
 
   const now = new Date();
@@ -46,20 +45,48 @@ export const completeHint = async (req,res) => {
 
 
 
+// export const createHint = async (req, res) => {
+//   try {
+//     const { brandId, title, description } = req.body;
+
+//     if (!brandId || !title || !description)
+//       return res.status(400).json({ message: "All fields required" });
+
+//     const hint = await Hint.create({
+//       type: "TEXT",
+//       category: brandId,
+//       title,
+//       description,
+//       createdBy: req.user.userId,
+//       status: "approved" // or pending if approval flow
+//     });
+
+//     res.status(201).json({ message: "Hint created", hint });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+
+
+// working without brand 
+
+
+
 export const createHint = async (req, res) => {
   try {
     const { brandId, title, description } = req.body;
 
-    if (!brandId || !title || !description)
-      return res.status(400).json({ message: "All fields required" });
+    if (!title || !description)
+      return res.status(400).json({ message: "Title and description required" });
 
     const hint = await Hint.create({
       type: "TEXT",
-      category: brandId,
+      category: brandId || null,  // allow null
       title,
       description,
       createdBy: req.user.userId,
-      status: "approved" // or pending if approval flow
+      status: "approved"
     });
 
     res.status(201).json({ message: "Hint created", hint });

@@ -6,11 +6,8 @@ import nodemailer from "nodemailer";
 import {ResetToken } from "../models/ResetToken.model.js";
 import {Company} from "../models/Company.model.js"; 
 
-
 export const adminSignup = async (req, res) => {
   const { fullName, email, password, companyName } = req.body;
-
-  const company = await Company.create({ name: companyName });
 
   const hashed = await bcrypt.hash(password, 10);
 
@@ -18,9 +15,17 @@ export const adminSignup = async (req, res) => {
     fullName,
     email,
     password: hashed,
-    role: "admin",
-    companyId: company._id
+    role: "admin"
   });
+
+  const company = await Company.create({
+    name: companyName,
+    createdBy: admin._id,
+    status: "incomplete"
+  });
+
+  admin.companyId = company._id;
+  await admin.save();
 
   const token = jwt.sign(
     { userId: admin._id, role: admin.role, companyId: company._id },
@@ -30,6 +35,7 @@ export const adminSignup = async (req, res) => {
 
   res.status(201).json({ token, admin, company });
 };
+// above is latest which containing comany created by in comany 
 
 export const login = async (req, res) => {
   try {

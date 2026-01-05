@@ -7,13 +7,18 @@ const hintSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+     category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Brand",
+    default: null   // ❌ remove required:true
+  },
 
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Brand",
-      required: true,
-      index: true,
-    },
+    // category: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Brand",
+    //   required: true,
+    //   index: true,
+    // },
 
     title: {
       type: String,
