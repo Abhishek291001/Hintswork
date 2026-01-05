@@ -39,5 +39,5 @@ const brandSchema = new mongoose.Schema(
 );
 
 brandSchema.index({ name: 1, companyId: 1 }, { unique: true });
+export const Brand = mongoose.model("Brand", brandSchema); 
 
-export const Brand = mongoose.model("Brand", brandSchema);
