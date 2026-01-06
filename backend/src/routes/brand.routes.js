@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post("/admin/brands", authMiddleware, adminOnly, createBrand);
 router.get("/getMyBrands", authMiddleware, adminOnly, getMyBrands);
-router.patch("/brands/:id", authMiddleware, adminOnly, updateBrand);
-router.delete("/brands/:id", authMiddleware, adminOnly, deleteBrand);
+router.patch("/:id", authMiddleware, adminOnly, updateBrand);
+router.delete("/:id", authMiddleware, adminOnly, deleteBrand);
 
 export default router;

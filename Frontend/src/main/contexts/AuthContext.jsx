@@ -7,36 +7,36 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
 
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+  //   if (!token) {
+  //     setLoading(false);
+  //     return;
+  //   }
 
-    axios
-      .get(`${API_BASE_URL}/api/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        setUser(res.data.user);
-        console.log(user);
-        setRole(res.data.user.role);
-      })
-      .catch(() => {
-        localStorage.removeItem("token");
-        setUser(null);
-        setRole(null);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+  //   axios
+  //     .get(`${API_BASE_URL}/api/users/me`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((res) => {
+  //       setUser(res.data.user);
+  //       console.log(user);
+  //       setRole(res.data.user.role);
+  //     })
+  //     .catch(() => {
+  //       localStorage.removeItem("token");
+  //       setUser(null);
+  //       setRole(null);
+  //     })
+  //     .finally(() => {
+  //       setLoading(false);
+  //     });
+  // }, []);
 
 
 
@@ -62,6 +62,57 @@ export const AuthProvider = ({ children }) => {
   //     return null;
   //   }
   // };
+
+    // Load user on app start
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return setLoading(false);
+
+    try {
+      const decoded = jwtDecode(token);
+      setRole(decoded.role);
+    } catch {
+      localStorage.removeItem("token");
+      setLoading(false);
+      return;
+    }
+
+    axios
+      .get(`${API_BASE_URL}/api/users/me?t=${Date.now()}`, { // bypass cache
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setUser(res.data.user))
+      .catch(() => {
+        localStorage.removeItem("token");
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+//   useEffect(() => {
+//   const token = localStorage.getItem("token");
+
+//   if (!token) {
+//     setLoading(false);
+//     return;
+//   }
+
+//   try {
+//     const decoded = jwtDecode(token);
+    
+//     if (decoded.exp * 1000 < Date.now()) {
+//       logout();
+//       setLoading(false);
+//       return;
+//     }
+
+//     setUser({ token });
+//     setRole(decoded.role);
+//   } catch (err) {
+//     logout();
+//   } finally {
+//     setLoading(false);
+//   }
+// }, []);
 
    const login = async (email, password) => {
     const res = await axios.post(`${API_BASE_URL}/api/auth/login`, {
@@ -196,7 +247,7 @@ const signup = async (userData) => {
 
 
   return (
-    <AuthContext.Provider value={{ user,role, login, logout, forgotPassword, verifyOtp, resetPassword ,signup, loading, error }}>
+    <AuthContext.Provider value={{ user,role, login,setUser, logout, forgotPassword, verifyOtp, resetPassword ,signup, loading, error }}>
       {children}
     </AuthContext.Provider>
   );

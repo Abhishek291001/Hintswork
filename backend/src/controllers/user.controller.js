@@ -327,26 +327,29 @@ export const getMe = async (req, res) => {
   }
 };
 
-// Patch /api/users/me
+
+// PATCH /api/users/me
 export const updateMe = async (req, res) => {
   try {
-    const allowedUpdates = ["fullName", "department", "avatar", "phoneNumber"];
+    const allowedUpdates = ["fullName", "department", "avatar", "phoneNumber", "email"];
     const updates = {};
 
     allowedUpdates.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        updates[field] = req.body[field];
-      }
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
     });
 
+    // Update user
     const updatedUser = await User.findByIdAndUpdate(
-      req.userId,
+      req.user.userId,
       updates,
       { new: true, runValidators: true }
-    ).select("-password");
+    ).select("-password"); // Never return password
 
-    res.status(200).json(updatedUser);
+    res.status(200).json({ user: updatedUser });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -361,4 +364,27 @@ export const deleteMe = async (req, res) => {
   }
 };
 
+// Patch /api/users/me
+// export const updateMe = async (req, res) => {
+//   try {
+//     const allowedUpdates = ["fullName", "department", "avatar", "phoneNumber"];
+//     const updates = {};
+
+//     allowedUpdates.forEach((field) => {
+//       if (req.body[field] !== undefined) {
+//         updates[field] = req.body[field];
+//       }
+//     });
+
+//     const updatedUser = await User.findByIdAndUpdate(
+//       req.userId,
+//       updates,
+//       { new: true, runValidators: true }
+//     ).select("-password");
+
+//     res.status(200).json(updatedUser);
+//   } catch (error) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
 

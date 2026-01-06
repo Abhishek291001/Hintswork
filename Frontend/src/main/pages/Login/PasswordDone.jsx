@@ -106,13 +106,14 @@
 
 
 import React, { useState,useEffect } from "react";
-import useAuth from "../../hooks/useAuth";
+import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo2.png";
 import Rectangles from '../../assets/Rectangles.png';
 import Image5 from '../../assets/Image5.png';
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import tick from '../../assets/tick.png';
+ 
 
 
 const PasswordDone = () => {

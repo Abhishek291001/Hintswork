@@ -78,7 +78,7 @@
 
 
 import React, { useState } from "react";
-import useAuth from "../../hooks/useAuth";
+import { useAuth } from "../../contexts/AuthContext"; 
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo2.png";
 import Rectangles from '../../assets/Rectangles.png';

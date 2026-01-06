@@ -465,8 +465,10 @@ import avatarImage from "../../assets/profile.png";
 import { ArrowLeft } from "lucide-react";
 import axios from "axios";
 import API_BASE_URL from "../../config/apiConfig";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Profile = () => {
+  const { user, setUser } = useAuth();
   const [profile, setProfile] = useState({
     fullName: "",
     email: "",
@@ -474,13 +476,14 @@ const Profile = () => {
     avatar: { url: null },
     phoneNumber:"",
   });
-
+ const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   // frontend-only notifications
   const [notifications, setNotifications] = useState(
     JSON.parse(localStorage.getItem("notifications")) ?? true
   );
 
-  const [loading, setLoading] = useState(true);
 
   // ================= FETCH PROFILE =================
   useEffect(() => {
@@ -494,11 +497,10 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
 
-        const res = await axios.get(`${API_BASE_URL}/api/users/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await axios.get(`${API_BASE_URL}/api/users/me?t=${Date.now()}`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
 
         setProfile({
           fullName: res.data.user.fullName || "",
@@ -530,41 +532,67 @@ const Profile = () => {
   };
 
   // ================= SAVE PROFILE (PATCH) =================
+  // const handleSave = async () => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) return;
+
+  //     await axios.patch(
+  //       `${API_BASE_URL}/api/users/me`,
+  //       {
+  //         fullName: profile.fullName,
+  //         department: profile.department,
+  //         phoneNumber:profile.phoneNumber,
+  //         email:profile.email,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     // persist notifications (frontend-only)
+  //     localStorage.setItem(
+  //       "notifications",
+  //       JSON.stringify(notifications)
+  //     );
+
+  //     alert("Profile updated successfully");
+  //   } catch (err) {
+  //     console.error(
+  //       "Failed to update profile:",
+  //       err.response?.data || err.message
+  //     );
+  //     alert("Failed to update profile");
+  //   }
+  // };
+
   const handleSave = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
+  try {
+    setSaving(true);
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-      await axios.patch(
-        `${API_BASE_URL}/api/users/me`,
-        {
-          fullName: profile.fullName,
-          department: profile.department,
-          phoneNumber:profile.phoneNumber,
-          email:profile.email,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const { data } = await axios.patch(
+      `${API_BASE_URL}/api/users/me`,
+      {
+        fullName: profile.fullName,
+        department: profile.department,
+        phoneNumber: profile.phoneNumber,
+        email: profile.email,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      // persist notifications (frontend-only)
-      localStorage.setItem(
-        "notifications",
-        JSON.stringify(notifications)
-      );
-
-      alert("Profile updated successfully");
-    } catch (err) {
-      console.error(
-        "Failed to update profile:",
-        err.response?.data || err.message
-      );
-      alert("Failed to update profile");
-    }
-  };
+    setUser(data.user); // ✅ Correctly update context
+    alert("Profile updated successfully");
+  } catch (err) {
+    alert(err.response?.data?.message || "Failed to update profile");
+  } finally {
+    setSaving(false);
+  }
+};
 
   if (loading) return <h1>Loading Profile...</h1>;
 
@@ -685,12 +713,16 @@ const Profile = () => {
         {/* SAVE */}
         <div className="mt-4 flex justify-center">
           <button
-            onClick={handleSave}
-            className="bg-gradient-to-b from-[#FFE074] to-[#E3B512] px-8 py-3 rounded-md font-bold text-[#786A08]"
-          >
-            Save Changes
-          </button>
+  onClick={handleSave}
+  disabled={saving}
+  className="bg-gradient-to-b from-[#FFE074] to-[#E3B512] px-8 py-3 rounded-md font-bold text-[#786A08]"
+>
+  {saving ? "Saving..." : "Save Changes"}
+</button>
+
         </div>
+        {error && <p className="text-red-600 mt-2">{error}</p>}
+
       </div>
     </div>
   );

@@ -119,7 +119,7 @@ export default function AppRoutes() {
           <Route
             path="/dashboard/*"
             element={
-              <ProtectedRoute allowedRoles={["admin", "manager", "employee"]}>
+              <ProtectedRoute allowedRoles={["admin", "superadmin", "employee"]}>
                 <DashboardLayout>
                
                  <TabContent />

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../../hooks/useAuth";
+import { useAuth } from "../../contexts/AuthContext";
 import logo from "../../assets/logo2.png";
 import Rectangles from '../../assets/Rectangles.png';
 import Image1 from '../../assets/Image1.png';

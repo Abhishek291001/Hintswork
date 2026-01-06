@@ -36,6 +36,59 @@ export const completeHint = async (req,res) => {
 };
 
 
+
+// working without brand 
+
+
+
+export const createHint = async (req, res) => {
+  try {
+    const { brandId, title, description } = req.body;
+
+    if (!title || !description)
+      return res.status(400).json({ message: "Title and description required" });
+
+    const hint = await Hint.create({
+      type: "TEXT",
+      category: brandId || null,  // allow null
+      title,
+      description,
+      createdBy: req.user.userId,
+      status: "approved"
+    });
+
+    res.status(201).json({ message: "Hint created", hint });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+// DELETE /api/company/admin/hints/:id
+export const deleteHint = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find hint created by admin within their company
+    const hint = await Hint.findOne({
+      _id: id,
+      createdBy: req.user.userId,  // only the creator can delete
+    });
+
+    if (!hint) {
+      return res.status(404).json({ message: "Hint not found or you don't have permission" });
+    }
+
+    await hint.remove();
+
+    res.status(200).json({ message: "Hint deleted successfully" });
+  } catch (err) {
+    console.error("Delete hint error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // POST /api/admin/hints
 // {
 //   "brandId": "65fb8c...",
@@ -68,29 +121,3 @@ export const completeHint = async (req,res) => {
 // };
 
 
-
-// working without brand 
-
-
-
-export const createHint = async (req, res) => {
-  try {
-    const { brandId, title, description } = req.body;
-
-    if (!title || !description)
-      return res.status(400).json({ message: "Title and description required" });
-
-    const hint = await Hint.create({
-      type: "TEXT",
-      category: brandId || null,  // allow null
-      title,
-      description,
-      createdBy: req.user.userId,
-      status: "approved"
-    });
-
-    res.status(201).json({ message: "Hint created", hint });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
