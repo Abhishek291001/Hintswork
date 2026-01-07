@@ -111,7 +111,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo2.png";
 import Rectangles from '../../assets/Rectangles.png';
 import Image5 from '../../assets/Image5.png';
-import { FiEye, FiEyeOff } from "react-icons/fi";
+// import { FiEye, FiEyeOff } from "react-icons/fi";
 import tick from '../../assets/tick.png';
  
 
@@ -123,7 +123,7 @@ const PasswordDone = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+ 
 
 
   const handleSubmit = async (e) => {

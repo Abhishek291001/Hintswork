@@ -83,7 +83,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo2.png";
 import Rectangles from '../../assets/Rectangles.png';
 import Image2 from '../../assets/Image2.png';
-import { FiEye, FiEyeOff } from "react-icons/fi";
+// import { FiEye, FiEyeOff } from "react-icons/fi";
 
 
 

@@ -4,12 +4,12 @@ const ActionButtons = ({ buttons = [] }) => {
   return (
     <div className="flex flex-wrap gap-3 sm:gap-4">
       {buttons.map((btn, index) => (
-        <button
+        <button 
           key={index}
           onClick={btn.onClick}
           disabled={btn.disabled}
           className={`
-             sm:px-6 sm:py-3
+             sm:px-4 sm:py-3
             
             font-semibold
             text-base sm:text-lg
@@ -17,7 +17,7 @@ const ActionButtons = ({ buttons = [] }) => {
 
 flex items-center justify-center
 
-            px-4 py-2 text-lg rounded-[6px] w-full sm:w-[221px] h-[44px]
+            px-4 py-2 text-lg rounded-[6px] 
             ${
               btn.disabled
                 ? "bg-[#FFEFB5] text-[#B5A44A] cursor-not-allowed"
