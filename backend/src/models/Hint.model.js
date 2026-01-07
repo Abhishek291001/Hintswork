@@ -1,59 +1,89 @@
 import mongoose from "mongoose";
 
-const hintSchema = new mongoose.Schema(
-  {
-    // type: {
-    //   type: String,
-    //   required: true,
-    //   index: true,
-    // },
-     category: {
+// const hintSchema = new mongoose.Schema(
+//   {
+//     // type: {
+//     //   type: String,
+//     //   required: true,
+//     //   index: true,
+//     // },
+//      category: {
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: "Brand",
+//     default: null   // ❌ remove required:true
+//   },
+
+//     // category: {
+//     //   type: mongoose.Schema.Types.ObjectId,
+//     //   ref: "Brand",
+//     //   required: true,
+//     //   index: true,
+//     // },
+
+//     title: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//       index: true,
+//     },
+
+//     description: {
+//       type: String,
+//       required: true,
+//     },
+
+//     approvalRequired: {
+//       type: Boolean,
+//       default: true,
+//       index: true,
+//     },
+
+//     status: {
+//       type: String,
+//       enum: ["pending", "approved", "rejected"],
+//       default: "pending",
+//       index: true,
+//     },
+
+//     createdBy: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "User", // admin/manager
+//       required: true,
+//     },
+//   },
+//   { timestamps: true }
+// );
+
+const hintSchema = new mongoose.Schema({
+  category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Brand",
-    default: null   // ❌ remove required:true
+    default: null
+  },
+  
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending"
   },
 
-    // category: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Brand",
-    //   required: true,
-    //   index: true,
-    // },
-
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-      index: true,
-    },
-
-    description: {
-      type: String,
-      required: true,
-    },
-
-    approvalRequired: {
-      type: Boolean,
-      default: true,
-      index: true,
-    },
-
-    status: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
-      index: true,
-    },
-
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // admin/manager
-      required: true,
-    },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
   },
-  { timestamps: true }
-);
 
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Company",
+    required: true,
+    index: true
+  }
+
+}, { timestamps: true });
 /**
  * Text search for hints
  */
@@ -63,3 +93,5 @@ hintSchema.index({
 });
 
 export const Hint = mongoose.model("Hint", hintSchema);
+
+

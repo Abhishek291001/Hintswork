@@ -1,5 +1,7 @@
 import { Hint } from "../models/hint.model.js";
 
+import { Brand } from "../models/brand.model.js";
+
 export const getCurrentSlot = async (req,res) => {
 
   const now = new Date();
@@ -41,6 +43,28 @@ export const completeHint = async (req,res) => {
 
 
 
+// export const createHint = async (req, res) => {
+//   try {
+//     const { brandId, title, description } = req.body;
+
+//     if (!title || !description)
+//       return res.status(400).json({ message: "Title and description required" });
+
+//     const hint = await Hint.create({
+//       // type: "TEXT",
+//       category: brandId || null,  // allow null
+//       title,
+//       description,
+//       createdBy: req.user.userId,
+//       status: "approved"
+//     });
+
+//     res.status(201).json({ message: "Hint created", hint });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 export const createHint = async (req, res) => {
   try {
     const { brandId, title, description } = req.body;
@@ -48,16 +72,30 @@ export const createHint = async (req, res) => {
     if (!title || !description)
       return res.status(400).json({ message: "Title and description required" });
 
+    let brand = null;
+
+    if (brandId) {
+      brand = await Brand.findOne({
+        _id: brandId,
+        companyId: req.user.companyId
+      });
+
+      if (!brand)
+        return res.status(403).json({ message: "Invalid brand for your company" });
+    }
+
     const hint = await Hint.create({
-      // type: "TEXT",
-      category: brandId || null,  // allow null
+      category: brand ? brand._id : null,
       title,
       description,
       createdBy: req.user.userId,
-      status: "approved"
+      companyId: req.user.companyId,
+      status: "pending"
     });
 
+
     res.status(201).json({ message: "Hint created", hint });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -98,26 +136,41 @@ export const deleteHint = async (req, res) => {
 
 
 
-// export const createHint = async (req, res) => {
-//   try {
-//     const { brandId, title, description } = req.body;
 
-//     if (!brandId || !title || !description)
-//       return res.status(400).json({ message: "All fields required" });
+export const getHintsByBrand = async (req, res) => {
+  try {
+    const { brandId } = req.params;
+    const page = parseInt(req.query.page || 1);
+    const limit = Math.min(50, parseInt(req.query.limit || 20));
+    const skip = (page - 1) * limit;
 
-//     const hint = await Hint.create({
-//       type: "TEXT",
-//       category: brandId,
-//       title,
-//       description,
-//       createdBy: req.user.userId,
-//       status: "approved" // or pending if approval flow
-//     });
+    const filter = {
+      companyId: req.user.companyId,
+      category: brandId
+    };
 
-//     res.status(201).json({ message: "Hint created", hint });
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
+    const [hints, total] = await Promise.all([
+      Hint.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .select("title description status createdAt")
+        .lean(),
+
+      Hint.countDocuments(filter)
+    ]);
+
+    res.json({
+      page,
+      totalPages: Math.ceil(total / limit),
+      total,
+      hints
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 
 
