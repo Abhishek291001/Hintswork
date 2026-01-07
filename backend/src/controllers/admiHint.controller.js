@@ -1,6 +1,6 @@
-import { Hint } from "../models/hint.model.js";
+import { Hint } from "../models/Hint.model.js";
 
-import { Brand } from "../models/brand.model.js";
+import { Brand } from "../models/Brand.model.js";
 
 export const getCurrentSlot = async (req,res) => {
 
@@ -101,6 +101,26 @@ export const createHint = async (req, res) => {
   }
 };
 
+export const getHintById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const hint = await Hint.findOne({
+      _id: id,
+      companyId: req.user.companyId
+    })
+    .populate("category", "name")
+    .lean();
+
+    if (!hint)
+      return res.status(404).json({ message: "Hint not found" });
+
+    res.status(200).json({ hint });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 // DELETE /api/company/admin/hints/:id
