@@ -169,38 +169,44 @@ onChange={(e) =>
   }`}
           />
 
+
+
+          
+
           <label className="block text-[#786A08] font-semibold mb-2 text-md raleway">
             Domain
           </label>
-          <input
-            value={companyData.domain}
-onChange={(e) =>
-  setCompanyData({ ...companyData, domain: e.target.value })
-}
+      
+  <input
+    value={companyData.domain}
+    onChange={(e) =>
+      setCompanyData({ ...companyData, domain: e.target.value })
+    }
+    readOnly={!editMode.company}
+    className={`w-full max-w-[360px] mb-4 rounded-lg border border-[#786A08] px-4 py-2 text-[#786A08] font-semibold text-sm sm:text-base lg:text-lg raleway ${
+      editMode.company
+        ? "bg-white cursor-text"
+        : "bg-[#FFFDF5] cursor-not-allowed opacity-70"
+    }`}
+  />
 
-            readOnly={!editMode.company}
-            className={`w-full max-w-[360px] rounded-lg border border-[#786A08] px-4 py-2 text-[#786A08] font-semibold text-sm sm:text-base lg:text-lg raleway ${
-    editMode.company
-      ? "bg-white cursor-text"
-      : "bg-[#FFFDF5] cursor-not-allowed opacity-70"
-  }`}
-          />
-
-
-{editMode.company && (
-  <button
-    onClick={updateCompanyProfile}
-    disabled={loading}
-    className={`mt-4 ml-20 px-8 py-2 w-[100px] rounded-lg font-semibold text-[#786A08] transition
-      ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-gradient-to-b from-[#FFE074] to-[#E3B512] hover:from-[#E3B512] hover:to-[#FFE074]"
-      }`}
-  >
-    {loading ? "Saving..." : "Save"}
-  </button>
-)}
+  {editMode.company && (
+    <button
+      onClick={updateCompanyProfile}
+      disabled={loading}
+      className={`px-6 py-2 w-[100px] ml-20 rounded-lg font-semibold text-[#786A08] transition
+        ${loading
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-gradient-to-b from-[#FFE074] to-[#E3B512] hover:from-[#E3B512] hover:to-[#FFE074]"
+        }`}
+    >
+      {loading ? "Saving..." : "Save"}
+    </button>
+  )}
+</div>
 
           
-        </div>
+        
 
         
 
@@ -279,7 +285,6 @@ onChange={(e) =>
             <h2 className="text-[#786A08] text-lg sm:text-xl lg:text-xl font-semibold montserrat">
               Time Slot Scheduling
             </h2>
-           
            <img
   src={Editicon}
   onClick={() => toggleEdit("timeSlot")}
@@ -287,8 +292,7 @@ onChange={(e) =>
     editMode.timeSlot ? "opacity-100" : "opacity-70"
   }`}
 />
-  
-  </div>
+          </div>
 
           <div className="flex gap-6 flex-wrap">
             {[

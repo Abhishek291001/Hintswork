@@ -3,7 +3,7 @@ import { Brand } from "../models/Brand.model.js";
 
 export const createBrand = async (req, res) => {
   try {
-    const { name, shortDescription, image } = req.body;
+    const { name, shortDescription } = req.body;
 
     if (!name || !shortDescription)
       return res.status(400).json({ message: "Name and description required" });
@@ -20,7 +20,8 @@ export const createBrand = async (req, res) => {
     const brand = await Brand.create({
       name,
       shortDescription,
-      image: image || null,
+      // image: image || null,
+       image: null,   
       companyId: req.user.companyId,
       isSystemBrand: false
     });

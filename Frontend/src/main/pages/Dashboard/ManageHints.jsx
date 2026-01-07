@@ -7,6 +7,7 @@ import EditHintModal from "./EditHintModal";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API_BASE_URL from "../../config/apiConfig";
+import EditBrandModal from "./EditBrandModal";
 
 // const STORAGE_KEY = "manage_hints";
 
@@ -33,6 +34,9 @@ const ManageHints = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [isNew, setIsNew] = useState(false); // Track if it's a new hint
   const [selectedHintTable, setSelectedHintTable] = useState(null);
+  const [showEditBrandModal, setShowEditBrandModal] = useState(false);
+const [selectedBrand, setSelectedBrand] = useState(null);
+
 
    useEffect(() => {
     const fetchHints = async () => {
@@ -77,14 +81,21 @@ const ManageHints = () => {
     setShowEditModal(true);
   };
 
+  const handleAddBrandClick = () => {
+  setSelectedBrand({ name: "", shortDescription: "", image: null });
+  setIsNew(true); // optional if you want to track new brand
+  setShowEditBrandModal(true);
+};
+
+
  const handleSave = async (hintData) => {
     const token = localStorage.getItem("token");
 
     try {
       if (isNew) {
         const res = await axios.post(`${API_BASE_URL}/api/brand/admin/brands`, {
-          name: hintData.title,
-          shortDescription: hintData.desc,
+          name: hintData.name,
+          shortDescription: hintData.shortDescription,
           image: hintData.image,
         }, {
           headers: { Authorization: `Bearer ${token}` },
@@ -102,8 +113,8 @@ const ManageHints = () => {
         const res = await axios.put(
           `${API_BASE_URL}/api/brand/${hintData._id}`,
           {
-            name: hintData.title,
-            shortDescription: hintData.desc,
+            name: hintData.name,
+            shortDescription: hintData.shortDescription,
             image: hintData.image,
           },
           { headers: { Authorization: `Bearer ${token}` } }
@@ -130,6 +141,45 @@ const ManageHints = () => {
   };
 
 
+const handleSaveBrand = async (brandData) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+      `${API_BASE_URL}/api/brand/admin/brands`,
+      {
+        name: brandData.name,
+        shortDescription: brandData.shortDescription,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    setHints(prev => [
+      ...prev,
+      {
+        _id: res.data.brand._id,
+        title: res.data.brand.name,
+        desc: res.data.brand.shortDescription,
+        image: null,
+      },
+    ]);
+  } catch (err) {
+    console.error("Failed to save brand:", err.response?.data || err);
+    alert("Failed to save brand");
+  } finally {
+    setShowEditBrandModal(false);
+    setSelectedBrand(null);
+  }
+};
+
+
+
+
 
   const handleDeleteBrand = async (_id) => {
     if (!_id) return;
@@ -154,7 +204,7 @@ const ManageHints = () => {
 
   const topButtons = [
     { label: "Add Private Hint", onClick: () => handleAddClick("Private Hint") },
-    { label: "Add Private Brand", onClick: () => handleAddClick("Private Brand") },
+    { label: "Add Private Brand", onClick: () => handleAddBrandClick("Private Brand") },
     { label: "Upload Spreadsheet", onClick: () => console.log("Upload clicked") },
   ];
 
@@ -245,6 +295,30 @@ return (
           </div>
         </div>
       )}
+
+
+      {showEditBrandModal && (
+  <EditBrandModal
+    isOpen={showEditBrandModal}
+    initialData={selectedBrand}
+    onClose={() => {
+      setShowEditBrandModal(false);
+      setSelectedBrand(null);
+    }}
+    onSubmit={handleSaveBrand}
+    //{
+      
+    //=>
+    // {
+      // handle save logic for brand
+      // console.log("Brand data submitted:", handleSaveBrand);
+      // setShowEditBrandModal(false);
+      // setSelectedBrand(null);
+      // optionally update the brand list here
+    //}}
+  />
+)}
+
     </div>
   );
 };

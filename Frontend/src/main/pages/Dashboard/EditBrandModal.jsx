@@ -5,20 +5,20 @@ import { ArrowLeft } from "lucide-react";
 
 const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
   const [brandForm, setBrandForm] = useState({
-    brandName: "",
-    totalHints: "",
+    name: "",
+    // totalHints: "",
     shortDescription: "",
-    isUnderHintWorks: false,
-    image: null,
+    // isUnderHintWorks: false,
+    // image: null,
   });
 
   useEffect(() => {
     if (isOpen) {
       setBrandForm({
-        brandName: initialData.brandName || "",
-        totalHints: initialData.totalHints || "",
+        name: initialData.name || "",
+        // totalHints: initialData.totalHints || "",
         shortDescription: initialData.shortDescription || "",
-        isUnderHintWorks: initialData.isUnderHintWorks || false,
+        // isUnderHintWorks: initialData.isUnderHintWorks || false,
         image: initialData.image || null,
       });
     }
@@ -36,14 +36,15 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(brandForm);
-    onClose();
+    // onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-40 backdrop-blur-sm flex justify-center items-center overflow-y-auto p-4" onClick={onClose}>
-      <div className="bg-[#FFFAF4] w-full max-w-[690px] rounded-[14px] px-6 sm:px-11 py-8 shadow-lg relative max-h-screen overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 backdrop-blur-sm bg-black bg-opacity-40 flex justify-center items-center overflow-y-auto p-4" onClick={onClose}>
+                   
+      <div className="bg-[#FFFDF5] w-full max-w-[690px] rounded px-6 sm:px-11 py-8 shadow-lg relative max-h-screen overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
   {/* Left side: Back arrow + title */}
   <div className="flex items-center gap-2">
@@ -53,7 +54,7 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
       onClick={onClose}
     />
     <h2 className="text-2xl font-semibold text-[#786A08] montserrat">
-      Edit Brand
+      Add Brand
     </h2>
   </div>
 
@@ -74,15 +75,15 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
             </label>
             <input
               type="text"
-              name="brandName"
-              value={brandForm.brandName}
+              name="name"
+              value={brandForm.name}
               onChange={handleFormChange}
-              className="h-[54px] px-1.5 border border-[#786A08] text-[#786A08] rounded-[10px] bg-[#FFFAF4]"
+              className="h-[50px] px-1.5 border border-[#786A08] text-[#786A08] rounded bg-[#FFFAF4]"
               required
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          {/* <div className="flex flex-col gap-2">
             <label className="text-lg font-semibold text-[#786A08] raleway">
               Total No. of Hints
             </label>
@@ -91,10 +92,10 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
               name="totalHints"
               value={brandForm.totalHints}
               onChange={handleFormChange}
-              className="h-[54px] px-1.5 border border-[#786A08] text-[#786A08] rounded-[10px] bg-[#FFFAF4]"
+              className="h-[54px] px-1.5 border border-[#786A08] text-[#786A08] rounded bg-[#FFFAF4]"
               required
             />
-          </div>
+          </div> */}
 
           <div className="flex flex-col gap-2">
             <label className="text-lg font-semibold text-[#786A08] raleway">
@@ -104,12 +105,16 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
               name="shortDescription"
               value={brandForm.shortDescription}
               onChange={handleFormChange}
-              className="p-2 border border-[#786A08] text-[#786A08] rounded-[10px] bg-[#FFFAF4]"
+              className=" border border-[#786A08] text-[#786A08] rounded bg-[#FFFAF4]"
               required
             />
           </div>
 
-          <div className="flex items-center gap-2">
+
+
+          
+
+          {/* <div className="flex items-center gap-2">
             <input
               type="checkbox"
               name="isUnderHintWorks"
@@ -117,12 +122,12 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
               onChange={(e) =>
                 setBrandForm({ ...brandForm, isUnderHintWorks: e.target.checked })
               }
-              className="h-5 w-5 border border-[#786A08] rounded-[10px] bg-[#FFFAF4]"
+              className="h-5 w-5 border border-[#786A08] rounded bg-[#FFFAF4]"
             />
             <label className="text-lg font-semibold text-[#786A08] montserrat">
               Is under Hint Work?
             </label>
-          </div>
+          </div> */}
 
           <div className="flex flex-col gap-2">
             <label className="text-lg font-semibold text-[#786A08] raleway">
@@ -133,7 +138,7 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
                 type="file"
                 name="image"
                 onChange={handleImageChange}
-                className="py-3.5 w-full px-1.5 border border-[#786A08] rounded-[10px] bg-[#FFFAF4]"
+                className="py-2.5 w-full px-1.5 border border-[#786A08] rounded bg-[#FFFAF4]"
               />
               {brandForm.image && (
                 <FaTrash
@@ -147,13 +152,13 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
           <div className="flex justify-center gap-5 mt-11">
             <button
               type="submit"
-              className="px-6 py-3 text-xl h-[53px] w-full max-w-[192px] bg-gradient-to-b from-[#FFE074] to-[#E3B512] text-[#786A08] font-bold rounded-sm cursor-pointer montserrat"
+              className="px-6 py-3 text-xl h-[50px] rounded w-full max-w-[192px] bg-gradient-to-b from-[#FFE074] to-[#E3B512] text-[#786A08] font-bold cursor-pointer montserrat"
             >
-              Update
+              Save
             </button>
             <div
               onClick={onClose}
-              className="px-6 py-3 text-xl text-center h-[53px] w-full max-w-[192px] bg-gradient-to-b from-[#FFE074] to-[#E3B512] text-[#786A08] font-bold rounded-sm cursor-pointer montserrat"
+              className="px-6 py-3 text-xl text-center h-[50px] w-full max-w-[192px] bg-gradient-to-b from-[#FFE074] to-[#E3B512] text-[#786A08] font-bold rounded cursor-pointer montserrat"
             >
               Cancel
             </div>
