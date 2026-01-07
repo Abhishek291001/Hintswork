@@ -19,7 +19,7 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
         // totalHints: initialData.totalHints || "",
         shortDescription: initialData.shortDescription || "",
         // isUnderHintWorks: initialData.isUnderHintWorks || false,
-        image: initialData.image || null,
+        // image: initialData.image || null,
       });
     }
   }, [isOpen, initialData]);
@@ -29,9 +29,9 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
     setBrandForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
-    setBrandForm((prev) => ({ ...prev, image: e.target.files[0] }));
-  };
+  // const handleImageChange = (e) => {
+  //   setBrandForm((prev) => ({ ...prev, image: e.target.files[0] }));
+  // };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -129,7 +129,7 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
             </label>
           </div> */}
 
-          <div className="flex flex-col gap-2">
+          {/* <div className="flex flex-col gap-2">
             <label className="text-lg font-semibold text-[#786A08] raleway">
               Image
             </label>
@@ -147,7 +147,7 @@ const EditBrandModal = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
                 />
               )}
             </div>
-          </div>
+          </div> */}
 
           <div className="flex justify-center gap-5 mt-11">
             <button

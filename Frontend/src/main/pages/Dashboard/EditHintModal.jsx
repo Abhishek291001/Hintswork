@@ -1,31 +1,30 @@
 import React, { useState } from "react";
 import { RxCrossCircled } from "react-icons/rx";
 
-const HINT_TYPES = ["Hint+", "Hint++"];
-const CATEGORIES = [
-  "HintDiet",
-  "HintWork",
-  "HintHealth",
-  "HintFinance",
-  "HintCalm",
-  "HintEducation",
-];
+// const HINT_TYPES = ["Hint+", "Hint++"];
+// const CATEGORIES = [
+//   "HintDiet",
+//   "HintWork",
+//   "HintHealth",
+//   "HintFinance",
+//   "HintCalm",
+//   "HintEducation",
+// ];
 
-const EditHintModal = ({ hint, onClose, onSave }) => {
-  const [hintType, setHintType] = useState(hint?.type || HINT_TYPES[0]);
-  const [category, setCategory] = useState(hint?.category || CATEGORIES[0]);
-  const [title, setTitle] = useState(hint?.title || "");
-  const [desc, setDesc] = useState(hint?.desc || "");
-  const [approval, setApproval] = useState(hint?.approval || false);
+const EditHintModal = ({ hint,brandId, onClose, onSave }) => {
+  // const [hintType, setHintType] = useState(hint?.type || HINT_TYPES[0]);
+  // const [category, setCategory] = useState(hint?.category || CATEGORIES[0]);
+const [title, setTitle] = useState(hint?.title || "");
+const [description, setDescription] = useState(hint?.description || "");
+
+  // const [approval, setApproval] = useState(hint?.approval || false);
 
   const handleSave = () => {
     onSave({
-      ...hint,
-      type: hintType,
-      category,
       title,
-      desc,
-      approval,
+      description,
+    brandId,
+      // approval,
     });
   };
 
@@ -48,7 +47,7 @@ const EditHintModal = ({ hint, onClose, onSave }) => {
         </p>
 
         <div className="flex flex-col gap-4">
-          <div>
+          {/* <div>
             <label className="block text-[#786A08] mb-1 raleway font-semibold text-lg">Hint Type</label>
             <select
               className="w-full border border-[#786A08] rounded p-2 text-[#786A08]"
@@ -60,9 +59,9 @@ const EditHintModal = ({ hint, onClose, onSave }) => {
                 
               ))}
             </select>
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <label className="block text-[#786A08] mb-1 raleway font-semibold text-lg">Category</label>
             <select
               className="w-full border border-[#786A08] rounded p-2 text-[#786A08]"
@@ -73,7 +72,7 @@ const EditHintModal = ({ hint, onClose, onSave }) => {
                 <option key={cat}>{cat}</option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           <div>
             <label className="block text-[#786A08] mb-1 raleway font-semibold text-lg">Hint Title</label>
@@ -89,13 +88,13 @@ const EditHintModal = ({ hint, onClose, onSave }) => {
             <label className="block text-[#786A08] mb-1 raleway font-semibold text-lg">Description</label>
             <textarea
               className="w-full border border-[#786A08] rounded p-2 text-[#786A08]"
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
          
-          <div className="flex items-center gap-4">
+          {/* <div className="flex items-center gap-4">
             <span className="text-[#786A08] raleway font-semibold text-lg">Approval Required</span>
             <button
               type="button"
@@ -110,10 +109,10 @@ const EditHintModal = ({ hint, onClose, onSave }) => {
                 }`}
               />
             </button>
-          </div>
+          </div> */}
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 justify-center">
-  <button
+  {/* <button
     className="
       bg-yellow-400 text-[#786A08] font-bold
       py-2 px-6
@@ -124,7 +123,7 @@ const EditHintModal = ({ hint, onClose, onSave }) => {
     onClick={handleSave}
   >
     Submit for Approval
-  </button>
+  </button> */}
 
   <button
     className="

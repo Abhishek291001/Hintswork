@@ -76,7 +76,7 @@ const [selectedBrand, setSelectedBrand] = useState(null);
 
   // Open modal for creating new hint
   const handleAddClick = () => {
-    setSelectedHint({ title: "", desc: "", image: null });
+    setSelectedHint({ title: "", description: "", brandId: null });
     setIsNew(true);
     setShowEditModal(true);
   };
@@ -89,56 +89,31 @@ const [selectedBrand, setSelectedBrand] = useState(null);
 
 
  const handleSave = async (hintData) => {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    try {
-      if (isNew) {
-        const res = await axios.post(`${API_BASE_URL}/api/brand/admin/brands`, {
-          name: hintData.name,
-          shortDescription: hintData.shortDescription,
-          image: hintData.image,
-        }, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const newHint = {
-          _id: res.data.brand._id,
-          title: res.data.brand.name,
-          desc: res.data.brand.shortDescription,
-          image: res.data.brand.image?.url || null,
-        };
-
-        setHints((prev) => [...prev, newHint]);
-      } else {
-        const res = await axios.put(
-          `${API_BASE_URL}/api/brand/${hintData._id}`,
-          {
-            name: hintData.name,
-            shortDescription: hintData.shortDescription,
-            image: hintData.image,
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        const updatedHint = {
-          _id: res.data.brand._id,
-          title: res.data.brand.name,
-          desc: res.data.brand.shortDescription,
-          image: res.data.brand.image?.url || null,
-        };
-
-        setHints((prev) =>
-          prev.map((h) => (h._id === updatedHint._id ? updatedHint : h))
-        );
+  try {
+    const res = await axios.post(
+      `${API_BASE_URL}/api/hints/admin/hints`,
+      {
+        title: hintData.title,
+        description: hintData.description,
+        brandId: hintData.brandId || null,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
       }
-    } catch (err) {
-      console.error("Failed to save hint:", err);
-      alert("Failed to save hint. Please try again.");
-    } finally {
-      setShowEditModal(false);
-      setSelectedHint(null);
-    }
-  };
+    );
+
+    alert("Hint saved successfully");
+  } catch (err) {
+    console.error("Failed to save hint:", err.response?.data || err);
+    alert(err.response?.data?.message || "Failed to save hint");
+  } finally {
+    setShowEditModal(false);
+    setSelectedHint(null);
+  }
+};
+
 
 
 const handleSaveBrand = async (brandData) => {
@@ -229,7 +204,7 @@ return (
             <div
               key={hint._id}
               className="relative flex items-start gap-4 border-[2.55px] border-yellow-300 rounded-lg p-4 hover:shadow-md transition bg-[#FFFDF5] cursor-pointer"
-              onClick={() => navigate("hint-table", { state: { hint } })}
+              onClick={() => navigate("hint-table", { state: { brandId: hint._id, brandName: hint.title, } })}
             >
               <div className="flex items-start gap-4">
                 <div className="flex flex-col items-center">

@@ -49,7 +49,7 @@ export const createHint = async (req, res) => {
       return res.status(400).json({ message: "Title and description required" });
 
     const hint = await Hint.create({
-      type: "TEXT",
+      // type: "TEXT",
       category: brandId || null,  // allow null
       title,
       description,
