@@ -64,7 +64,7 @@ const ManageHints = () => {
   ];
 
   return (
-    <div className="p-6 bg-white font-montserrat" >
+    <div className="p-2 bg-white font-montserrat" >
    <div
   className="
     flex flex-col

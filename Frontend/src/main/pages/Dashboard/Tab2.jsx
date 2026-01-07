@@ -601,7 +601,7 @@ const handleDeleteEmployee = async (id) => {
   const paginatedEmployees = employees; // Already paginated by backend
 
    return (
-    <div className="space-y-6 font-montserrat">
+    <div className="space-y-6  font-montserrat">
       <div className="flex flex-col lg:flex-row justify-between gap-4 mb-6 mt-0">
         <div className="flex items-center gap-3 text-[#786A08]">
           <ArrowLeft className="cursor-pointer" />

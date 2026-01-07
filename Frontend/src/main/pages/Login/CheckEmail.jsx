@@ -229,7 +229,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo2.png";
 import Rectangles from '../../assets/Rectangles.png';
 import Image3 from '../../assets/Image3.png';
-import { FiEye, FiEyeOff } from "react-icons/fi";
+// import { FiEye, FiEyeOff } from "react-icons/fi";
 
 
 const CheckEmail = () => {

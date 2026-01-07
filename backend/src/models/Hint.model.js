@@ -2,11 +2,11 @@ import mongoose from "mongoose";
 
 const hintSchema = new mongoose.Schema(
   {
-    type: {
-      type: String,
-      required: true,
-      index: true,
-    },
+    // type: {
+    //   type: String,
+    //   required: true,
+    //   index: true,
+    // },
      category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Brand",

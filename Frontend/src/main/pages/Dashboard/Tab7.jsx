@@ -193,6 +193,7 @@ const toggleEdit = (key) => {
             <h2 className="text-[#786A08] text-lg sm:text-xl lg:text-xl font-semibold montserrat">
               Time Slot Scheduling
             </h2>
+           
            <img
   src={Editicon}
   onClick={() => toggleEdit("timeSlot")}
@@ -200,7 +201,8 @@ const toggleEdit = (key) => {
     editMode.timeSlot ? "opacity-100" : "opacity-70"
   }`}
 />
-          </div>
+  
+  </div>
 
           <div className="flex gap-6 flex-wrap">
             {[

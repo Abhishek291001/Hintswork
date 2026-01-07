@@ -49,7 +49,7 @@ const Header = ({ toggleSidebar }) => {
   
  
   return (
-    <div className="header flex justify-between items-center px-5 py-3 md:py-4 bg-[#fffbef] text-black sticky top-0 z-20">
+    <div className="header flex justify-between items-center px-5 py-2 md:py-2 bg-[#fffbef] text-black sticky top-0 z-20">
       
       <div className="lg:hidden">
         <div onClick={toggleSidebar} className="text-2xl text-[#786A08] cursor-pointer">

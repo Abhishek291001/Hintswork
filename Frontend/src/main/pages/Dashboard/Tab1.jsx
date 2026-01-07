@@ -116,10 +116,10 @@
 
 
 import React, { useEffect, useState } from 'react';
-import { FaUsers, FaUserShield, FaLightbulb, FaUserTie } from 'react-icons/fa';
-import CircleProgress from './CircleProgress';
+// import { FaUsers, FaUserShield, FaLightbulb, FaUserTie } from 'react-icons/fa';
+// import CircleProgress from './CircleProgress';
 import BarProgress from './BarProgress';
-import HintsGrid from './HintsGrid';
+// import HintsGrid from './HintsGrid';
 import Nousers from '../../assets/3users.png';
 // import Totalhints from '../../assets/totalhints.png';
 // import HintsBrand from '../../assets/brands.png';
