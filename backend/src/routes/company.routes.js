@@ -2,7 +2,7 @@ import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { adminOnly } from "../middleware/adminOnly.middleware.js";
 import { companyOwner } from "../middleware/companyOwner.middleware.js";
-import { updateCompany } from "../controllers/company.controller.js";
+import { getCompanyProfile, updateCompany } from "../controllers/company.controller.js";
 const router = express.Router();
 
 router.put(
@@ -11,6 +11,12 @@ router.put(
   adminOnly,
   companyOwner,
   updateCompany
+);
+
+router.get(
+  "/profile",
+  authMiddleware,
+  getCompanyProfile
 );
 
 export default router;

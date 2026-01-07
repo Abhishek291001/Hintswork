@@ -22,3 +22,24 @@ export const updateCompany = async (req, res) => {
 
   res.json({ message: "Company updated", company });
 };
+
+export const getCompanyProfile = async (req, res) => {
+  try {
+    const company = await Company.findById(req.user.companyId);
+
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    res.json({
+      company: {
+        name: company.name || "",
+        domain: company.domain || "",
+        status: company.status,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

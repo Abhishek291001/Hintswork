@@ -122,11 +122,22 @@ export const deleteBrand = async (req, res) => {
 
     if (!brand) return res.status(404).json({ message: "Brand not found" });
 
-    await brand.remove();
+    await Brand.deleteOne({ _id: brand._id });
+
 
     res.status(200).json({ message: "Brand deleted successfully" });
   } catch (err) {
     console.error("Delete brand error:", err);
     res.status(500).json({ message: "Server error" });
   }
+};
+
+// GET company brands
+export const getBrands = async (req, res) => {
+  const brands = await Brand.find({
+    companyId: req.user.companyId,
+    isSystemBrand: false,
+  });
+
+  res.json({ brands });
 };

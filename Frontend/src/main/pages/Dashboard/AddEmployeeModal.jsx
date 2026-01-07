@@ -313,7 +313,7 @@ const handleSave = () => {
   return (
     <div className="fixed inset-0 z-50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" onClick={onClose}>
       <div
-        className="bg-[#FFFAF4] w-full max-w-[560px] max-h-[90vh]
+        className="bg-[#FFFAF4] w-full max-w-[560px] max-h-[97vh]
         rounded-xl px-5 sm:px-6 py-5 sm:py-6 shadow-lg relative
         overflow-y-auto scrollbar-thin scrollbar-thumb-[#FFD34E]" onClick={(e) => e.stopPropagation()}  
       >

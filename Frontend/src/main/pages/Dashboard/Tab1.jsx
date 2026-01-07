@@ -253,7 +253,7 @@ const Tab1 = () => {
         </p>
 
        <div className="flex flex-col gap-6 mt-2">
-  <div className="bg-[#FEDC63] rounded-xl shadow-sm p-5 pl-6 cursor-pointer hover:scale-105 transition-all duration-200 flex items-center justify-start gap-3">
+  <div className="bg-[#FEDC63] rounded-xl shadow-sm p-5 pl-6 cursor-pointer hover:scale-105 transition-all duration-200 flex items-center justify-start gap-3" onClick={() => setShowAddEmployee(true)}>
     <img
       src={Nousers}
       alt="Add Employees"

@@ -6,7 +6,7 @@ import { completeHint, createHint, deleteHint, getCurrentSlot } from "../control
 const router = express.Router();
 
 router.get( "/slots/current", getCurrentSlot);
-router.get("/hints/complete",completeHint);
+router.get("/complete",completeHint);
 router.post("/admin/hints", authMiddleware, adminOnly, createHint);
 // Delete hint
 router.delete("/admin/hints/:id", authMiddleware, adminOnly, deleteHint);

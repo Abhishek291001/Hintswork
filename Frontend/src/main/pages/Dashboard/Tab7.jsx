@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Editicon from "../../assets/edit.svg";
 import Moon from "../../assets/Moon.png";
 import bulbs from "../../assets/bulbs.png";
 import hints from "../../assets/hints.png";
-import { ArrowLeft } from "lucide-react";
-
+import { ArrowLeft, ImportIcon } from "lucide-react";
+import axios from "axios";
+import API_BASE_URL from "../../config/apiConfig";
 
 const Tab7 = () => {
 
@@ -26,6 +27,15 @@ const [editMode, setEditMode] = useState({
 });
 
 
+const [companyData, setCompanyData] = useState({
+  name: "",
+  domain: "",
+});
+
+const [loading, setLoading] = useState(false);
+
+
+
 const toggleEdit = (key) => {
   setEditMode((prev) => ({
     ...prev,
@@ -33,6 +43,55 @@ const toggleEdit = (key) => {
   }));
 };
 
+const updateCompanyProfile = async () => {
+  try {
+    setLoading(true);
+
+    const res = await axios.put(
+      `${API_BASE_URL}/api/company/updateCompany`,
+      {
+        name: companyData.name,
+        domain: companyData.domain,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+
+    alert("Company profile updated successfully");
+    setEditMode((prev) => ({ ...prev, company: false }));
+  } catch (error) {
+    console.error(error);
+    alert("Failed to update company profile");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+useEffect(() => {
+  const fetchCompany = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/company/profile`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      setCompanyData({
+        name: res.data.company.name,
+        domain: res.data.company.domain,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchCompany();
+}, []);
 
 
   return (
@@ -86,7 +145,9 @@ const toggleEdit = (key) => {
   className={`w-5 h-5 cursor-pointer ${
     editMode.company ? "opacity-100" : "opacity-70"
   }`}
-  onClick={() => toggleEdit("company")}
+onClick={() => toggleEdit("company")}
+
+
 />
 
           </div>
@@ -95,7 +156,11 @@ const toggleEdit = (key) => {
             Company Name
           </label>
           <input  
-            value="HintsWork Inc."
+            value={companyData.name}
+onChange={(e) =>
+  setCompanyData({ ...companyData, name: e.target.value })
+}
+
              readOnly={!editMode.company}
              className={`w-full max-w-[360px] mb-4 rounded-lg border border-[#786A08] px-4 py-2 text-[#786A08] font-semibold text-sm sm:text-base lg:text-lg raleway ${
     editMode.company
@@ -108,7 +173,11 @@ const toggleEdit = (key) => {
             Domain
           </label>
           <input
-            value="sso.hintswork.com"
+            value={companyData.domain}
+onChange={(e) =>
+  setCompanyData({ ...companyData, domain: e.target.value })
+}
+
             readOnly={!editMode.company}
             className={`w-full max-w-[360px] rounded-lg border border-[#786A08] px-4 py-2 text-[#786A08] font-semibold text-sm sm:text-base lg:text-lg raleway ${
     editMode.company
@@ -116,7 +185,24 @@ const toggleEdit = (key) => {
       : "bg-[#FFFDF5] cursor-not-allowed opacity-70"
   }`}
           />
+
+
+{editMode.company && (
+  <button
+    onClick={updateCompanyProfile}
+    disabled={loading}
+    className={`mt-4 ml-20 px-8 py-2 w-[100px] rounded-lg font-semibold text-[#786A08] transition
+      ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-gradient-to-b from-[#FFE074] to-[#E3B512] hover:from-[#E3B512] hover:to-[#FFE074]"
+      }`}
+  >
+    {loading ? "Saving..." : "Save"}
+  </button>
+)}
+
+          
         </div>
+
+        
 
         {/* RIGHT */}
         <div className="flex-1  relative">
