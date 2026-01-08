@@ -298,8 +298,10 @@ import ActionButtons from "./ActionButtons";
 import { ArrowLeft } from "lucide-react";
 import EditHintModal from "./EditHintModal";
 import DeleteConfirmModal from "./DeleteConfirmModal";
+import axios from "axios";
+import API_BASE_URL from "../../config/apiConfig";
 
-const STORAGE_KEY = "hints_by_brand";
+// const STORAGE_KEY = "hints_by_brand";
 const ITEMS_PER_PAGE = 5;
 
 const HintTablePage = () => {
@@ -313,24 +315,63 @@ const HintTablePage = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+const [loading, setLoading] = useState(false);
+
 
   // Load hints for this brand
   useEffect(() => {
-    if (!brandId) {
-      navigate("/dashboard/hints/manage-hints");
-      return;
-    }
+  if (!brandId) {
+    navigate("/dashboard/hints/manage-hints");
+    return;
+  }
 
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-    setHints(stored[brandId] || []);
-  }, [brandId, navigate]);
+  fetchHints();
+}, [brandId, currentPage]);
 
-  const saveToStorage = (updatedHints) => {
-    const all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-    all[brandId] = updatedHints;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-    setHints(updatedHints);
-  };
+
+  // const saveToStorage = (updatedHints) => {
+  //   const all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  //   all[brandId] = updatedHints;
+  //   localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  //   setHints(updatedHints);
+  // };
+
+
+  const fetchHints = async () => {
+  try {
+    setLoading(true);
+const token = localStorage.getItem("token"); // get token
+    const res = await axios.get(
+      `${API_BASE_URL}/api/hints/brands/${brandId}/hints`,
+      {
+        params: {
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`, // attach token
+        },
+      }
+    );
+
+    setHints(
+      res.data.hints.map((h) => ({
+        id: h._id,
+        title: h.title,
+        description: h.description,
+        brandName,
+      }))
+    );
+
+    setTotalPages(res.data.totalPages);
+  } catch (err) {
+    console.error("Failed to fetch hints", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleEdit = (hint) => {
     setSelectedHint(hint);
@@ -346,37 +387,72 @@ const HintTablePage = () => {
   // };
 
 
-  const handleModalSubmit = (updatedHint) => {
-  const newHint = {
-    id: selectedHint?.id || Date.now(),
-    title: updatedHint.title,
-    description: updatedHint.description,
-    brandName,
-  };
+const handleModalSubmit = async (hintData) => {
+  try {
+    const token = localStorage.getItem("token");
 
-  const updated = selectedHint
-    ? hints.map((h) => (h.id === selectedHint.id ? newHint : h))
-    : [...hints, newHint];
+    await axios.post(
+      `${API_BASE_URL}/api/hints/admin/hints`,
+      {
+        title: hintData.title,
+        description: hintData.description,
+        brandId: hintData.brandId, // 🔥 THIS IS KEY
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  saveToStorage(updated);
-  setIsEditOpen(false);
-  setSelectedHint(null);
+    fetchHints(); // refresh list
+  } catch (err) {
+    console.error("Failed to save hint", err);
+  } finally {
+    setIsEditOpen(false);
+    setSelectedHint(null);
+  }
 };
 
 
 
-  const confirmDelete = () => {
-    const updated = hints.filter((h) => h.id !== deleteId);
-    saveToStorage(updated);
+  // const updated = selectedHint
+  //   ? hints.map((h) => (h.id === selectedHint.id ? newHint : h))
+  //   : [...hints, newHint];
+
+  // saveToStorage(updated);
+  // setIsEditOpen(false);
+  // setSelectedHint(null);
+//};
+
+
+
+const confirmDelete = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    await axios.delete(`${API_BASE_URL}/api/company/admin/hints/${deleteId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    fetchHints();
+  } catch (err) {
+    console.error("Delete failed", err);
+  } finally {
     setIsDeleteOpen(false);
     setDeleteId(null);
-  };
+  }
+};
 
-  const totalPages = Math.ceil(hints.length / ITEMS_PER_PAGE);
-  const paginated = hints.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+
+
+  // const totalPages = Math.ceil(hints.length / ITEMS_PER_PAGE);
+  // const paginated = hints.slice(
+  //   (currentPage - 1) * ITEMS_PER_PAGE,
+  //   currentPage * ITEMS_PER_PAGE
+  // );
 
   return (
     <div className="bg-white">
@@ -392,8 +468,19 @@ const HintTablePage = () => {
           </h2>
         </div>
         <ActionButtons
-          buttons={[{ label: "Create Hint", onClick: () => setIsEditOpen(true) }]}
-        />
+  buttons={[
+    {
+      label: "Create Hint",
+      onClick: () => {
+        setSelectedHint({
+          title: "",
+          description: "",
+        });
+        setIsEditOpen(true);
+      },
+    },
+  ]}
+/>
       </div>
 
       {/* TABLE */}
@@ -407,7 +494,7 @@ const HintTablePage = () => {
         </thead>
 
         <tbody>
-          {paginated.map((hint, i) => (
+          {hints.map((hint, i) => (
             <tr key={hint.id} className="text-center">
               <td>{(currentPage - 1) * ITEMS_PER_PAGE + i + 1}</td>
               <td>{hint.brandName}</td>

@@ -1,5 +1,5 @@
 import { Hint } from "../models/Hint.model.js";
-
+import mongoose from "mongoose";
 import { Brand } from "../models/Brand.model.js";
 
 export const getCurrentSlot = async (req,res) => {
@@ -164,10 +164,17 @@ export const getHintsByBrand = async (req, res) => {
     const limit = Math.min(50, parseInt(req.query.limit || 20));
     const skip = (page - 1) * limit;
 
-    const filter = {
-      companyId: req.user.companyId,
-      category: brandId
-    };
+    // const filter = {
+    //   companyId: req.user.companyId,
+    //   category: brandId
+    // };
+
+
+const filter = {
+  companyId: req.user.companyId,
+  category: new mongoose.Types.ObjectId(brandId),
+};
+
 
     const [hints, total] = await Promise.all([
       Hint.find(filter)
