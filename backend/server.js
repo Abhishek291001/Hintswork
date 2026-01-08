@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/company", companyRoutes );
-app.use("/api/hints", adminHintsRoutes );
+app.use("/api/hints/", adminHintsRoutes );
 app.use("/api/brand", brandRoutes );
 app.get("/", (req, res) => res.send("Server is running..."));
 
