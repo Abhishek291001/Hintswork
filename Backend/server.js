@@ -8,6 +8,7 @@ import authRoutes from "./src/routes/auth.routes.js";
 import companyRoutes from "./src/routes/company.routes.js";
 import adminHintsRoutes from "./src/routes/adminHints.routes.js";
 import brandRoutes from "./src/routes/brand.routes.js";
+import awardRoutes  from "./src/routes/award.routes.js";
 const app = express();
 connectDB();
 
@@ -20,6 +21,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/company", companyRoutes );
 app.use("/api/hints/", adminHintsRoutes );
 app.use("/api/brand", brandRoutes );
+app.use("/api/awards", awardRoutes );
 app.get("/", (req, res) => res.send("Server is running..."));
 
 const PORT = process.env.PORT || 5000;
