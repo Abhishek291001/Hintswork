@@ -2,7 +2,8 @@
 node_modules/
 #  Environment variables
 .env
-
+Frontend/.env
+Backend/.env
 # Logs
 logs/
 *.log
