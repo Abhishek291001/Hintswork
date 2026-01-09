@@ -1,10 +1,16 @@
 # Node modules
 node_modules/
 #  Environment variables
+# Ignore real env files
 .env
-.env.*
-Frontend/.env
 backend/.env
+Frontend/.env
+
+# Allow env examples
+!.env.example
+!backend/.env.example
+!Frontend/.env.example
+
 # Logs
 logs/
 *.log
